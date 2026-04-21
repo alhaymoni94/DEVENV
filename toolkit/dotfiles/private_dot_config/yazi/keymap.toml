@@ -1,0 +1,67 @@
+# keymap.toml — Yazi CUA keybindings
+# Arrow navigation, Ctrl+C/V/X for clipboard, Ctrl+W to quit
+
+[manager]
+
+prepend_keymap = [
+  # ── Navigation ──────────────────────────────────────────────────────────────
+  { on = "<Up>",           run = "arrow -1", desc = "Move up" },
+  { on = "<Down>",         run = "arrow 1",  desc = "Move down" },
+  { on = "<Left>",         run = "leave",    desc = "Go to parent directory" },
+  { on = "<Right>",        run = "enter",    desc = "Enter directory or open file" },
+  { on = "<Home>",         run = "arrow -99999999", desc = "Jump to top" },
+  { on = "<End>",          run = "arrow 99999999",  desc = "Jump to bottom" },
+  { on = "<PageUp>",       run = "arrow -50%", desc = "Scroll up half page" },
+  { on = "<PageDown>",     run = "arrow 50%",  desc = "Scroll down half page" },
+
+  # Quick jumps
+  { on = "~",              run = "cd ~",     desc = "Go to home directory" },
+  { on = "-",              run = "cd -",     desc = "Go to previous directory" },
+
+  # ── Selection ──────────────────────────────────────────────────────────────
+  { on = "<Space>",        run = [ "select --state=none", "arrow 1" ], desc = "Toggle selection and move down" },
+  { on = [ "v" ],          run = "visual_mode",         desc = "Enter visual selection mode" },
+  { on = [ "V" ],          run = "visual_mode --unset", desc = "Enter visual mode (unselect)" },
+  { on = [ "A", "a" ],     run = "select_all --state=true",  desc = "Select all" },
+
+  # ── Clipboard (CUA) ────────────────────────────────────────────────────────
+  { on = [ "<C-c>" ],      run = "copy",  desc = "Copy selected files" },
+  { on = [ "<C-x>" ],      run = "cut",   desc = "Cut selected files" },
+  { on = [ "<C-v>" ],      run = "paste", desc = "Paste copied/cut files" },
+
+  # ── File operations ────────────────────────────────────────────────────────
+  { on = [ "d" ],          run = "trash",  desc = "Move to trash" },
+  { on = [ "D" ],          run = "remove", desc = "Delete permanently" },
+  { on = [ "a" ],          run = "create", desc = "Create file or directory (use dirname/ for dirs)" },
+  { on = [ "r" ],          run = "rename --cursor=before_ext", desc = "Rename file" },
+  { on = [ "R" ],          run = "shell '$EDITOR'", desc = "Bulk rename selection in editor" },
+
+  # ── View & Search ──────────────────────────────────────────────────────────
+  { on = [ "." ],          run = "hidden toggle", desc = "Toggle hidden files" },
+  { on = [ "/" ],          run = "find --smart",  desc = "Search filenames" },
+  { on = [ "f" ],          run = "filter --smart", desc = "Filter visible files" },
+  { on = [ "s" ],          run = "sort interactive", desc = "Sort menu" },
+  { on = [ "z" ],          run = "plugin zoxide", desc = "Jump with zoxide" },
+
+  # ── Tabs ───────────────────────────────────────────────────────────────────
+  { on = [ "<C-t>" ],      run = "tab_create --current", desc = "New tab" },
+  { on = [ "<C-w>" ],      run = "tab_close --force",    desc = "Close tab" },
+  { on = [ "1" ],          run = "tab_switch 0",         desc = "Switch to tab 1" },
+  { on = [ "2" ],          run = "tab_switch 1",         desc = "Switch to tab 2" },
+  { on = [ "3" ],          run = "tab_switch 2",         desc = "Switch to tab 3" },
+  { on = [ "4" ],          run = "tab_switch 3",         desc = "Switch to tab 4" },
+  { on = [ "5" ],          run = "tab_switch 4",         desc = "Switch to tab 5" },
+  { on = [ "6" ],          run = "tab_switch 5",         desc = "Switch to tab 6" },
+  { on = [ "7" ],          run = "tab_switch 6",         desc = "Switch to tab 7" },
+  { on = [ "8" ],          run = "tab_switch 7",         desc = "Switch to tab 8" },
+  { on = [ "9" ],          run = "tab_switch 8",         desc = "Switch to tab 9" },
+  { on = [ "[" ],          run = "tab_switch -1 --relative", desc = "Previous tab" },
+  { on = [ "]" ],          run = "tab_switch 1 --relative",  desc = "Next tab" },
+
+  # ── Quit ───────────────────────────────────────────────────────────────────
+  { on = [ "<C-q>" ],      run = "quit", desc = "Quit and cd to current dir (via y wrapper)" },
+  { on = [ "q" ],          run = "quit --no-cwd-file", desc = "Quit without changing directory" },
+
+  # ── Help ───────────────────────────────────────────────────────────────────
+  { on = [ "<F1>" ],       run = "help", desc = "Open help" },
+]

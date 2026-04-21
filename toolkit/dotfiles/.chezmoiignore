@@ -1,0 +1,3 @@
+# .chezmoiignore — Files chezmoi should not manage
+# Machine-specific overrides (create these per-machine, don't track them)
+dot_netrc

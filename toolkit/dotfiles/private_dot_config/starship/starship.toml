@@ -1,0 +1,105 @@
+# starship.toml — Cross-platform prompt configuration
+# Matches Tokyo Night color palette, visually rich with icons
+
+format = """
+$os\
+$username\
+$hostname\
+$directory\
+$git_branch\
+$git_state\
+$git_status\
+$python\
+$nodejs\
+$rust\
+$golang\
+$docker_context\
+$cmd_duration\
+$line_break
+$character"""
+
+[character]
+success_symbol = "[❯](bold #9ece6a)"
+error_symbol   = "[❯](bold #f7768e)"
+vimcmd_symbol  = "[❮](bold #e0af68)"
+
+[os]
+disabled = false
+style = "bold #7aa2f7"
+format = "[$symbol ]($style)"
+
+[os.symbols]
+Linux = ""
+Macos = ""
+Windows = ""
+
+[directory]
+style            = "bold #7aa2f7"
+truncation_length = 3
+truncate_to_repo = true
+read_only        = " 󰌾"
+fish_style_pwd_dir_length = 1
+
+[git_branch]
+symbol = " "
+style  = "bold #bb9af7"
+format = "[$symbol$branch]($style)"
+
+[git_state]
+style = "bold #e0af68"
+format = "([$state( $progress_current/$progress_total)]($style))"
+
+[git_status]
+style     = "bold #f7768e"
+ahead     = "⇡${count}"
+behind    = "⇣${count}"
+diverged  = "⇕⇡${ahead_count}⇣${behind_count}"
+modified  = "!${count}"
+untracked = "?${count}"
+staged    = "+${count}"
+deleted   = "✘${count}"
+conflicted = "≠${count}"
+renamed    = "»${count}"
+format = "([$all_status$ahead_behind]($style))"
+
+[python]
+symbol          = "󰌠 "
+style           = "bold #e0af68"
+pyenv_version_name = true
+format = '[$symbol$version]($style)'
+
+[nodejs]
+symbol = "󰎙 "
+style  = "bold #9ece6a"
+format = '[$symbol$version]($style)'
+
+[rust]
+symbol = "󱘗 "
+style  = "bold #f7768e"
+format = '[$symbol$version]($style)'
+
+[golang]
+symbol = "󰟓 "
+style  = "bold #7dcfff"
+format = '[$symbol$version]($style)'
+
+[docker_context]
+symbol = "󰡨 "
+style  = "bold #7aa2f7"
+only_with_files = true
+format = '[$symbol$context]($style)'
+
+[cmd_duration]
+min_time = 2000
+style    = "bold #e0af68"
+format   = "[$duration]($style)"
+
+[hostname]
+ssh_only = true
+style    = "bold #9ece6a"
+format   = "[@$hostname]($style)"
+
+[username]
+show_always = false
+style_user  = "bold #9ece6a"
+style_root  = "bold #f7768e"

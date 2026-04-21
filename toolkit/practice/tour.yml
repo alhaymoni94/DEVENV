@@ -1,0 +1,78 @@
+# First-Run Tour Definition
+# Used by: cheat --start
+
+title: "Welcome to your terminal stack"
+intro: "A 2-minute tour. You can actually run each command as we go."
+
+steps:
+  - title: "Your file manager — yazi"
+    command: "y"
+    description: "Browse files with image preview. Arrow keys navigate, Enter opens."
+    keys:
+      - "↑/↓ — Navigate"
+      - "→/Enter — Open file or enter directory"
+      - "← — Go to parent"
+      - "Ctrl+C/X/V — Copy/Cut/Paste"
+      - "d — Trash"
+      - "a — Create file/dir"
+      - "r — Rename"
+      - "Ctrl+Q — Quit (cd's to current dir)"
+      - "/ — Search filenames"
+      - ". — Toggle hidden files"
+    tip: "Use the y wrapper (not yazi directly) — it drops you into the directory you quit from."
+
+  - title: "Your editor — micro"
+    command: "e filename"
+    description: "A terminal text editor with standard Ctrl shortcuts. No vim modes."
+    keys:
+      - "Ctrl+S — Save"
+      - "Ctrl+Q — Quit"
+      - "Ctrl+Z/Y — Undo/Redo"
+      - "Ctrl+F/H — Find/Replace"
+      - "Ctrl+/ — Toggle comment"
+      - "Ctrl+D — Duplicate line"
+      - "Ctrl+C/X/V — Copy/Cut/Paste"
+      - "Alt+Click — Add cursor (multi-edit)"
+    tip: "e . opens micro with a file browser sidebar."
+
+  - title: "Your git TUI — lazygit"
+    command: "lg"
+    description: "Visual git interface. Stage, commit, push, branch — all in one screen."
+    keys:
+      - "Space — Stage/unstage file"
+      - "a — Stage all"
+      - "c — Commit"
+      - "P/p — Push/Pull"
+      - "n — New branch"
+      - "z — Undo last action"
+      - "A — Amend last commit"
+      - "Tab — Cycle panels"
+      - "? — Show all keybindings"
+    tip: "z is your safety net — it undoes the last git action."
+
+  - title: "Your AI assistant — aichat"
+    command: "ai"
+    description: "Terminal-native AI chat. Pipe any output to it for analysis."
+    keys:
+      - "ai — Start interactive session"
+      - "ai \"question\" — One-shot answer"
+      - "cat file.py | ai \"explain this\" — Analyze code"
+      - "/role coder — Switch to coding persona"
+      - "/save file.md — Save conversation"
+      - "Ctrl+D — Exit"
+    tip: "Pipe error messages to ai for instant debugging help."
+
+  - title: "Your safety net — the cheat system"
+    command: "cheat"
+    description: "You never need to memorize anything. Look it up."
+    keys:
+      - "cheat — Interactive browser (fzf)"
+      - "cheat <topic> — Open specific cheatsheet"
+      - "qr <tool> — One-pager quick reference"
+      - "tip — Random pro tip"
+      - "cheat --quiz <topic> — Self-test"
+      - "cheat --undo <tool> — Recovery guide"
+      - "cheat --workflow <name> — Multi-tool workflow"
+    tip: "This is your external memory. Use it constantly."
+
+outro: "Tour complete. Type 'tip' anytime for a random tip. Type 'cheat --start' to retake this tour."

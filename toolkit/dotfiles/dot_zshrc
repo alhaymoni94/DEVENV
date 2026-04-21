@@ -1,0 +1,150 @@
+# .zshrc — AUT Linux Camp shell configuration
+# Managed by chezmoi. Source: ~/Documents/AUT-Projects/AUT-Linux-Camp/toolkit/dotfiles/dot_zshrc
+
+# ── zinit bootstrap ───────────────────────────────────────────────────────────
+ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
+if [[ ! -d "$ZINIT_HOME" ]]; then
+  echo "zinit not found. Run setup.sh to install."
+else
+  source "${ZINIT_HOME}/zinit.zsh"
+  autoload -Uz _zinit
+  (( ${+_comps} )) && _comps[zinit]=_zinit
+
+  zinit light zsh-users/zsh-autosuggestions
+  zinit light zsh-users/zsh-syntax-highlighting
+  zinit light zsh-users/zsh-completions
+  zinit light Aloxaf/fzf-tab
+fi
+
+# ── History ───────────────────────────────────────────────────────────────────
+HISTSIZE=50000
+SAVEHIST=50000
+HISTFILE="$HOME/.zsh_history"
+setopt SHARE_HISTORY
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_SPACE
+setopt HIST_REDUCE_BLANKS
+
+# ── Options ───────────────────────────────────────────────────────────────────
+setopt AUTO_CD              # type dir name to cd into it
+setopt CORRECT              # suggest corrections for typos
+setopt GLOB_DOTS            # include dotfiles in globs
+setopt NO_BEEP
+
+# ── PATH ──────────────────────────────────────────────────────────────────────
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/Documents/AUT-Projects/AUT-Linux-Camp/toolkit/scripts:$PATH"   # cheat and camp scripts
+
+# Homebrew (Linux path)
+if [[ -f "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+# Homebrew (Mac path)
+elif [[ -f "/opt/homebrew/bin/brew" ]]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+
+# ── Starship prompt ───────────────────────────────────────────────────────────
+if command -v starship &>/dev/null; then
+  export STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
+  eval "$(starship init zsh)"
+fi
+
+# ── fzf ───────────────────────────────────────────────────────────────────────
+if command -v fzf &>/dev/null; then
+  eval "$(fzf --zsh)"
+fi
+
+# ── mise (non-Python runtimes: Node, Go, etc.) ────────────────────────────────
+if command -v mise &>/dev/null; then
+  eval "$(mise activate zsh)"
+fi
+
+# ── Completion ────────────────────────────────────────────────────────────────
+autoload -Uz compinit
+compinit -d "$HOME/.zcompdump"
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'   # case-insensitive
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+
+# ── Keybindings ───────────────────────────────────────────────────────────────
+bindkey -e                  # Emacs keybindings in zsh (Ctrl+A, Ctrl+E, etc.)
+bindkey '^[[A' history-search-backward   # Up: history search
+bindkey '^[[B' history-search-forward    # Down: history search
+bindkey '^U'   backward-kill-line        # Ctrl+U: kill to line start
+bindkey '^K'   kill-line                 # Ctrl+K: kill to line end
+
+# ── Aliases ───────────────────────────────────────────────────────────────────
+alias lzd='lazydocker'
+alias lg='lazygit'
+alias ghd='gh dash'
+alias top='btop'
+alias e='micro'
+alias vim='micro'
+alias cat='bat 2>/dev/null || cat'
+
+# yazi — quit with q and your shell cds to the last directory you visited
+function y() {
+  local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+  yazi "$@" --cwd-file="$tmp"
+  if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+    builtin cd -- "$cwd"
+  fi
+  rm -f -- "$tmp"
+}
+
+# ls with color
+if command -v eza &>/dev/null; then
+  alias ls='eza --icons --group-directories-first'
+  alias ll='eza -lah --icons --group-directories-first'
+  alias tree='eza --tree --icons'
+else
+  alias ls='ls --color=auto'
+  alias ll='ls -lah --color=auto'
+fi
+
+# ── Environment ───────────────────────────────────────────────────────────────
+export EDITOR='micro'
+export VISUAL='micro'
+export PAGER='less'
+export LESS='-RFX'
+
+# ── Cargo bin (for aichat and other rust tools) ───────────────────────────────
+export PATH="$HOME/.cargo/bin:$PATH"
+export COLORTERM=truecolor
+export TERM=xterm-256color
+
+# ── Locale — override bad LC_CTYPE sent by macOS SSH client ──────────────────
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+
+# ── Cheat system shortcuts ────────────────────────────────────────────────────
+alias qr='cheat --quick'
+alias tip='cheat --daily'
+alias ai='aichat'
+
+# ── Stack management ─────────────────────────────────────────────────────────
+alias stack-update='bash "$HOME/Documents/AUT-Projects/AUT-Linux-Camp/toolkit/scripts/update.sh"'
+alias stack-backup='bash "$HOME/Documents/AUT-Projects/AUT-Linux-Camp/toolkit/scripts/backup.sh"'
+alias stack-restore='bash "$HOME/Documents/AUT-Projects/AUT-Linux-Camp/toolkit/scripts/restore.sh"'
+
+# ── Daily cheat reminder (shows once per day) ─────────────────────────────────
+_stack_reminder() {
+  local marker="$HOME/.cache/stack-cheat-reminder"
+  local today
+  today="$(date +%Y%m%d)"
+  if [ ! -f "$marker" ] || [ "$(cat "$marker" 2>/dev/null)" != "$today" ]; then
+    echo "$today" > "$marker"
+    printf "\n  \033[2mType 'cheat' for help, 'tip' for a random tip, 'cheat --start' for a tour\033[0m\n"
+  fi
+}
+_stack_reminder
+
+# ── Welcome dashboard (shows once per session) ────────────────────────────────
+_stack_dashboard() {
+  local marker="$HOME/.cache/stack-dashboard-shown"
+  if [ ! -f "$marker" ]; then
+    touch "$marker"
+    bash "$HOME/Documents/AUT-Projects/AUT-Linux-Camp/toolkit/scripts/dashboard.sh"
+  fi
+}
+_stack_dashboard

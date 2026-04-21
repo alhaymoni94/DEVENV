@@ -1,0 +1,43 @@
+# ghostty config — Cross-platform terminal configuration
+# Matches Tokyo Night theme across tmux and Emacs
+
+# ── Font ──────────────────────────────────────────────────────────────────────
+font-family = "JetBrainsMono Nerd Font"
+font-size = 13
+font-thicken = false
+line-height = 1.1
+
+# ── Colors ────────────────────────────────────────────────────────────────────
+theme = tokyo-night
+
+# ── Window ────────────────────────────────────────────────────────────────────
+window-padding-x = 8
+window-padding-y = 8
+window-theme = ghostty
+window-decoration = false
+
+# ── Cursor ────────────────────────────────────────────────────────────────────
+cursor-style = bar
+cursor-blink = true
+cursor-blink-rate = 500
+
+# ── Shell ─────────────────────────────────────────────────────────────────────
+# Uses system default shell (zsh)
+
+# ── Scrollback ────────────────────────────────────────────────────────────────
+scrollback-limit = 10000
+
+# ── Tab bar ───────────────────────────────────────────────────────────────────
+tab-bar = visibility
+tab-bar-position = top
+tab-bar-switch-with-scroll-wheel = true
+
+# ── Key bindings ──────────────────────────────────────────────────────────────
+# Splitting and pane navigation handled by tmux
+keybind = ctrl+shift+t=new_tab
+keybind = ctrl+shift+w=close_tab
+keybind = ctrl+shift+c=copy_to_clipboard
+keybind = ctrl+shift:v=paste_from_clipboard
+keybind = ctrl+=:increase_font_size:1
+keybind = ctrl+-:decrease_font_size:1
+keybind = ctrl+0:reset_font_size
