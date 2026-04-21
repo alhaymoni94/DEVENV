@@ -3,3 +3,5 @@ toolkit/dotfiles/.gitignore
 .opencode/
 claude-code-latest.txt
 scanned_document.pdf
+appsRepo.md
+mise.toml

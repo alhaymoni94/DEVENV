@@ -1,0 +1,128 @@
+#!/usr/bin/env bash
+# camp-progress — Show student progress through the camp
+
+set -euo pipefail
+
+STUDENT_DIR="$HOME/students/$(whoami)"
+TOTAL_PHASES=6
+TOTAL_LESSONS=18
+
+# Colors
+GREEN="\033[32m"
+CYAN="\033[1;36m"
+YELLOW="\033[33m"
+DIM="\033[2m"
+RED="\033[31m"
+RESET="\033[0m"
+BOLD="\033[1m"
+
+if [ ! -d "$STUDENT_DIR" ]; then
+    echo -e "${RED}✗${RESET} Student directory not found: $STUDENT_DIR"
+    echo -e "${DIM}Run setup.sh first.${RESET}"
+    exit 1
+fi
+
+echo -e "${CYAN}╔══════════════════════════════════════╗${RESET}"
+echo -e "${CYAN}║   Camp Progress                      ║${RESET}"
+echo -e "${CYAN}╚══════════════════════════════════════╝${RESET}"
+echo ""
+
+completed=0
+total=0
+
+for phase in $(seq 1 $TOTAL_PHASES); do
+    phase_dir="$STUDENT_DIR/phase-$phase"
+    lesson_count=0
+    lesson_done=0
+
+    if [ -d "$phase_dir" ]; then
+        for lesson_dir in "$phase_dir"/lesson-*; do
+            if [ -d "$lesson_dir" ]; then
+                lesson_count=$((lesson_count + 1))
+                total=$((total + 1))
+
+                # Check if student-lab.md exists in the lesson directory (copied from material)
+                lab_file="$lesson_dir/student-lab.md"
+                # Check if any .py, .sh, or .md files exist (student work)
+                if find "$lesson_dir" -maxdepth 1 \( -name "*.py" -o -name "*.sh" -o -name "*.txt" -o -name "*.csv" -o -name "*.json" \) -print -quit 2>/dev/null | grep -q .; then
+                    lesson_done=$((lesson_done + 1))
+                    completed=$((completed + 1))
+                    echo -e "  ${GREEN}✓${RESET} Phase $phase, Lesson $(basename "$lesson_dir")"
+                else
+                    echo -e "  ${DIM}○${RESET} Phase $phase, Lesson $(basename "$lesson_dir") ${DIM}(not started)${RESET}"
+                fi
+            fi
+        done
+    fi
+
+    if [ $lesson_count -eq 0 ]; then
+        echo -e "  ${DIM}○${RESET} Phase $phase ${DIM}(not started)${RESET}"
+    elif [ $lesson_done -eq $lesson_count ]; then
+        echo -e "  ${GREEN}✓${RESET} Phase $phase ${GREEN}(complete)${RESET}"
+    else
+        echo -e "  ${YELLOW}◐${RESET} Phase $phase ${YELLOW}($lesson_done/$lesson_done lessons)${RESET}"
+    fi
+done
+
+echo ""
+pct=$(( completed * 100 / total ))
+bar_len=30
+filled=$(( pct * bar_len / 100 ))
+empty=$(( bar_len - filled ))
+
+printf "  Progress: ${GREEN}"
+for ((i=0; i<filled; i++)); do printf "█"; done
+printf "${DIM}"
+for ((i=0; i<empty; i++)); do printf "░"; done
+printf "${RESET} %d%%\n" "$pct"
+
+echo ""
+echo -e "  ${DIM}Completed: ${completed}/${total} lessons${RESET}"
+
+# Check milestones
+echo ""
+echo -e "${CYAN}── Milestones ──${RESET}"
+
+if bash toolkit/doctor.sh 2>&1 | grep -q "40 passed"; then
+    echo -e "  ${GREEN}✓${RESET} Setup complete (40/40 health)"
+else
+    echo -e "  ${RED}✗${RESET} Setup incomplete — run setup.sh"
+fi
+
+if [ $completed -ge 4 ]; then
+    echo -e "  ${GREEN}✓${RESET} Phase 1 complete"
+else
+    echo -e "  ${DIM}○${RESET} Phase 1 complete ($completed/4 lessons)"
+fi
+
+if [ $completed -ge 7 ]; then
+    echo -e "  ${GREEN}✓${RESET} Phase 2 complete"
+else
+    echo -e "  ${DIM}○${RESET} Phase 2 complete"
+fi
+
+if [ $completed -ge 10 ]; then
+    echo -e "  ${GREEN}✓${RESET} Phase 3 complete"
+else
+    echo -e "  ${DIM}○${RESET} Phase 3 complete"
+fi
+
+if [ $completed -ge 13 ]; then
+    echo -e "  ${GREEN}✓${RESET} Phase 4 complete"
+else
+    echo -e "  ${DIM}○${RESET} Phase 4 complete"
+fi
+
+if [ $completed -ge 17 ]; then
+    echo -e "  ${GREEN}✓${RESET} Phase 5 complete"
+else
+    echo -e "  ${DIM}○${RESET} Phase 5 complete"
+fi
+
+if [ $completed -ge 18 ]; then
+    echo -e "  ${GREEN}✓${RESET} Phase 6 complete — ready for graduation project!"
+else
+    echo -e "  ${DIM}○${RESET} Phase 6 complete"
+fi
+
+echo ""

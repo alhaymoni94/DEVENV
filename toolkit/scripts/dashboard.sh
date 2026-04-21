@@ -31,7 +31,7 @@ hr_top() { printf "${W}╔${D}%-56s${W}╗${N}\n" ""; }
 hr_mid() { printf "${W}╠${D}%-56s${W}╣${N}\n" ""; }
 row() { printf "${W}║${N} %-2s ${D}%-53s${W}║${N}\n" "$1" "$2"; }
 row_bold() { printf "${W}║${N} ${K}%-2s${N} ${K}%-53s${W}║${N}\n" "$1" "$2"; }
-row_cmd() { printf "${W}║${N}    ${G}%-14s${D}→ %s${N}%*s${W}║${N}\n" "$1" "$2" $((39 - ${#1} - ${#2})) ""; }
+row_cmd() { printf "${W}║${N}    ${G}%-16s${D}→ %s${N}%*s${W}║${N}\n" "$1" "$2" $((37 - ${#1} - ${#2})) ""; }
 
 # ── Gather System Info ────────────────────────────────────────────────────────
 # CPU
@@ -67,29 +67,30 @@ status_icon() {
 # ── Build Dashboard ───────────────────────────────────────────────────────────
 printf "\n"
 hr_top
-printf "${W}║${N} ${K}⚡  TERMINAL STACK DASHBOARD${N}%*s${W}║${N}\n" 26 ""
+printf "${W}║${N} ${K}⚡  AUT TERMINAL STACK${N}%*s${W}║${N}\n" 32 ""
+printf "${W}║${N} ${D}Linux Camp — Day $(date '+%b %d, %Y')${N}%*s${W}║${N}\n" 20 ""
 hr_mid
 
 # System row
-printf "${W}║${N} ${K}🖥  System${N}%*s${W}║${N}\n" 46 ""
+printf "${W}║${N} ${K}SYSTEM${N}%*s${W}║${N}\n" 50 ""
 hr
 row "" "CPU: ${cpu_usage}%  │  RAM: ${ram_used}M/${ram_total}M (${ram_pct}%)  │  Disk: ${disk_pct}%"
 hr
 
 # Tools row
-printf "${W}║${N} ${K}📦  Tools${N}%*s${W}║${N}\n" 47 ""
+printf "${W}║${N} ${K}TOOLS${N}%*s${W}║${N}\n" 51 ""
 hr
 row "" "${tool_count} installed  │  ${doctor_pass}/${doctor_total} healthy  │  ${tmux_sessions} tmux session(s)"
 hr
 
 # Status row
-printf "${W}║${N} ${K}🔧  Status${N}%*s${W}║${N}\n" 46 ""
+printf "${W}║${N} ${K}STATUS${N}%*s${W}║${N}\n" 50 ""
 hr
 row "" "$(status_icon micro) micro   $(status_icon yazi) yazi   $(status_icon lazygit) lazygit   $(status_icon aichat) aichat   $(status_icon fzf) fzf   $(status_icon btop) btop"
 hr
 
 # Quick start row
-printf "${W}║${N} ${K}🚀  Quick Start${N}%*s${W}║${N}\n" 41 ""
+printf "${W}║${N} ${K}QUICK START${N}%*s${W}║${N}\n" 45 ""
 hr_mid
 row_cmd "cheat --start" "2-min interactive tour"
 row_cmd "tip" "Random pro tip"
@@ -100,9 +101,10 @@ row_cmd "e file" "Editor"
 hr
 
 # Help row
-printf "${W}║${N} ${K}❓  Help${N}%*s${W}║${N}\n" 48 ""
+printf "${W}║${N} ${K}HELP${N}%*s${W}║${N}\n" 52 ""
 hr_mid
-row "" "cheat = reference  |  qr <tool> = quick-ref  |  cheat --undo = recovery  |  cheat --quiz = test"
+row "" "cheat = reference  │  qr <tool> = quick-ref  │  cheat --undo = recovery"
+row "" "cheat --quiz = test  │  cheat --workflow = guides  │  doctor.sh = health"
 hr_full
 
 printf "\n"

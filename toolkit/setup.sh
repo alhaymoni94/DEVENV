@@ -15,31 +15,77 @@ BLUE="\033[1;34m"
 GREEN="\033[32m"
 YELLOW="\033[33m"
 RED="\033[31m"
+MAGENTA="\033[1;35m"
 DIM="\033[2m"
 RESET="\033[0m"
 
+# ── Counters ──────────────────────────────────────────────────────────────────
 TOTAL_PHASES=9
 CURRENT_PHASE=0
+INSTALLED=0
+SKIPPED=0
+NOTES=0
 
+# ── Spinner ───────────────────────────────────────────────────────────────────
+spinner_pid=""
+spinner_chars=("⠋" "⠙" "⠹" "⠸" "⠼" "⠴" "⠦" "⠧" "⠇" "⠏")
+
+start_spinner() {
+  if [ -t 1 ]; then
+    local i=0
+    (
+      while true; do
+        printf "\r${DIM}  ${spinner_chars[$i]} installing...${RESET}"
+        i=$(( (i + 1) % ${#spinner_chars[@]} ))
+        sleep 0.1
+      done
+    ) &
+    spinner_pid=$!
+  fi
+}
+
+stop_spinner() {
+  if [ -n "$spinner_pid" ]; then
+    kill "$spinner_pid" 2>/dev/null
+    wait "$spinner_pid" 2>/dev/null
+    spinner_pid=""
+    printf "\r${DIM}                                             ${RESET}\r"
+  fi
+}
+
+# ── Phase header ──────────────────────────────────────────────────────────────
 step()  {
   ((CURRENT_PHASE++))
   local pct=$(( CURRENT_PHASE * 100 / TOTAL_PHASES ))
+  local filled=$(( pct / 5 ))
+  local empty=$(( 20 - filled ))
   local bar=""
-  for i in $(seq 1 20); do
-    if [ $(( i * 5 )) -le "$pct" ]; then
-      bar="${bar}█"
-    else
-      bar="${bar}░"
-    fi
-  done
-  printf "\n${CYAN}▶ %s${DIM} [%s] %d%%%s\n" "$1" "$bar" "$pct" "$RESET"
+  for ((i=0; i<filled; i++)); do bar="${bar}█"; done
+  for ((i=0; i<empty; i++)); do bar="${bar}░"; done
+  printf "\n${CYAN}── Phase %d/%d: %s${RESET}\n" "$CURRENT_PHASE" "$TOTAL_PHASES" "$1"
+  printf "${DIM}   [%s] %d%%%s\n" "$bar" "$pct" "$RESET"
 }
-done_() { printf "  ${GREEN}✓ %s${RESET}\n" "$1"; }
-skip()  { printf "  ${BLUE}· %s${RESET}\n" "$1"; }
-note()  { printf "  ${YELLOW}! %s${RESET}\n" "$1"; }
-die()   { printf "  ${RED}✗ %s${RESET}\n" "$1"; exit 1; }
 
-need_sudo() { note "This step needs sudo. Run: sudo $*"; }
+# ── Status helpers ────────────────────────────────────────────────────────────
+done_() {
+  ((INSTALLED++))
+  printf "  ${GREEN}✓${RESET} %s\n" "$1"
+}
+
+skip()  {
+  ((SKIPPED++))
+  printf "  ${BLUE}·${RESET} %s\n" "$1"
+}
+
+note()  {
+  ((NOTES++))
+  printf "  ${YELLOW}!${RESET} %s\n" "$1"
+}
+
+die()   {
+  printf "  ${RED}✗${RESET} %s\n" "$1"
+  exit 1
+}
 
 # ── OS detection ──────────────────────────────────────────────────────────────
 OS="$(uname -s)"
@@ -56,11 +102,18 @@ fi
 BREW="$BREW_PREFIX/bin/brew"
 export PATH="$HOME/.local/bin:$BREW_PREFIX/bin:$PATH"
 
-printf "${CYAN}╔══════════════════════════════════════════╗${RESET}\n"
-printf "${CYAN}║   Terminal Stack Setup                   ║${RESET}\n"
-printf "${CYAN}╚══════════════════════════════════════════╝${RESET}\n"
-echo "   OS: $OS ($ARCH)"
-echo "   Toolkit: $TOOLKIT_DIR"
+# ── Header ────────────────────────────────────────────────────────────────────
+printf "\n"
+printf "${CYAN}╔══════════════════════════════════════════════════╗${RESET}\n"
+printf "${CYAN}║${RESET}                                              ${CYAN}║${RESET}\n"
+printf "${CYAN}║${RESET}  ${BOLD}⚡  AUT Linux Camp — Terminal Stack Setup${RESET}  ${CYAN}║${RESET}\n"
+printf "${CYAN}║${RESET}                                              ${CYAN}║${RESET}\n"
+printf "${CYAN}╚══════════════════════════════════════════════════╝${RESET}\n"
+printf "\n"
+printf "  ${DIM}OS:${RESET}      $OS ($ARCH)\n"
+printf "  ${DIM}Toolkit:${RESET}  $TOOLKIT_DIR\n"
+printf "  ${DIM}Date:${RESET}     $(date '+%Y-%m-%d %H:%M')\n"
+printf "\n"
 
 # ── Phase 1: Homebrew ─────────────────────────────────────────────────────────
 step "Homebrew"
@@ -76,7 +129,12 @@ brew_install() {
   if command -v "$cmd" &>/dev/null || "$BREW" list "$pkg" &>/dev/null 2>&1; then
     skip "$pkg"
   else
-    "$BREW" install "$pkg" && done_ "$pkg"
+    start_spinner
+    "$BREW" install "$pkg" >/dev/null 2>&1 && done_ "$pkg" || {
+      stop_spinner
+      die "Failed to install $pkg"
+    }
+    stop_spinner
   fi
 }
 
@@ -86,7 +144,12 @@ uv_tool_install() {
   if command -v "$cmd" &>/dev/null; then
     skip "$pkg (uv tool)"
   else
-    uv tool install "$pkg" && done_ "$pkg"
+    start_spinner
+    uv tool install "$pkg" >/dev/null 2>&1 && done_ "$pkg" || {
+      stop_spinner
+      note "Failed to install $pkg via uv"
+    }
+    stop_spinner
   fi
 }
 
@@ -101,17 +164,15 @@ else
   else
     note "zsh not found. Install with: sudo apt install -y zsh"
     note "Then re-run this script."
-    # Try brew zsh as fallback
     brew_install zsh
   fi
 fi
 
-# zinit
 ZINIT_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/zinit/zinit.git"
 if [ -d "$ZINIT_DIR" ]; then
   skip "zinit"
 else
-  git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_DIR" \
+  git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_DIR" >/dev/null 2>&1 \
     && done_ "zinit"
 fi
 
@@ -124,20 +185,18 @@ if command -v wezterm &>/dev/null; then
   skip "wezterm"
 else
   if [[ "$OS" == "Darwin" ]]; then
-    brew install --cask wezterm && done_ "wezterm"
+    brew install --cask wezterm >/dev/null 2>&1 && done_ "wezterm"
   else
-    # Linux: download latest stable .deb
     WEZTERM_DEB_URL="https://github.com/wez/wezterm/releases/download/nightly/wezterm-nightly.Ubuntu24.04.deb"
     note "WezTerm: cannot install without sudo."
     note "Run manually: curl -LO $WEZTERM_DEB_URL && sudo apt install ./wezterm-nightly.Ubuntu24.04.deb"
   fi
 fi
 
-# Nerd Fonts
 if (set +o pipefail; fc-list 2>/dev/null | grep -qi "jetbrainsmono nerd\|jetbrainsmono nf"); then
   skip "JetBrainsMono Nerd Font"
 else
-  bash "$TOOLKIT_DIR/scripts/install-fonts.sh" && done_ "JetBrainsMono Nerd Font"
+  bash "$TOOLKIT_DIR/scripts/install-fonts.sh" >/dev/null 2>&1 && done_ "JetBrainsMono Nerd Font"
 fi
 
 # ── Phase 4: Editor (micro) ───────────────────────────────────────────────────
@@ -151,21 +210,19 @@ brew_install chezmoi
 if chezmoi status &>/dev/null 2>&1; then
   skip "chezmoi already initialized"
 else
-  chezmoi init --source "$DOTFILES_DIR" && done_ "chezmoi init"
+  chezmoi init --source "$DOTFILES_DIR" >/dev/null 2>&1 && done_ "chezmoi init"
 fi
 
-# Absorb existing configs if not yet managed
 absorb() {
   local file="$1"
   if [ -f "$file" ] && ! chezmoi managed "$file" &>/dev/null 2>&1; then
-    chezmoi add "$file" && done_ "absorbed $file"
+    chezmoi add "$file" >/dev/null 2>&1 && done_ "absorbed $file"
   fi
 }
 absorb "$HOME/.tmux.conf"
 absorb "$HOME/.zshrc"
 
 chezmoi apply --force --no-pager 2>/dev/null && done_ "chezmoi apply"
-
 
 # ── Phase 6: Runtimes + Tools ─────────────────────────────────────────────────
 step "Runtimes + Dev Tools"
@@ -188,26 +245,33 @@ uv_tool_install visidata vd
 uv_tool_install euporie
 brew_install llmfit
 
-# aichat
 if command -v aichat &>/dev/null; then
   skip "aichat"
 else
   if command -v cargo &>/dev/null; then
-    cargo install aichat && done_ "aichat"
+    start_spinner
+    cargo install aichat >/dev/null 2>&1 && done_ "aichat" || {
+      stop_spinner
+      note "aichat installation failed"
+    }
+    stop_spinner
   else
     note "aichat requires Rust — run: mise use rust@stable"
   fi
 fi
 
-# intelli-shell
 brew_install intelli-shell
 
-# mmdc (mermaid-cli)
 if command -v mmdc &>/dev/null; then
   skip "mmdc"
 else
   if command -v npm &>/dev/null; then
-    npm install -g @mermaid-js/mermaid-cli && done_ "mmdc"
+    start_spinner
+    npm install -g @mermaid-js/mermaid-cli >/dev/null 2>&1 && done_ "mmdc" || {
+      stop_spinner
+      note "mmdc installation failed"
+    }
+    stop_spinner
   else
     note "mmdc requires npm — run: mise use node@lts"
   fi
@@ -220,7 +284,7 @@ if gh extension list 2>/dev/null | grep -q "dlvhdr/gh-dash"; then
   skip "gh-dash extension"
 else
   if gh auth status &>/dev/null 2>&1; then
-    gh extension install dlvhdr/gh-dash && done_ "gh-dash extension"
+    gh extension install dlvhdr/gh-dash >/dev/null 2>&1 && done_ "gh-dash extension"
   else
     note "gh not authenticated — run 'gh auth login' then: gh extension install dlvhdr/gh-dash"
   fi
@@ -230,7 +294,7 @@ if gh extension list 2>/dev/null | grep -q "dlvhdr/gh-enhance"; then
   skip "gh-enhance extension"
 else
   if gh auth status &>/dev/null 2>&1; then
-    gh extension install dlvhdr/gh-enhance && done_ "gh-enhance extension"
+    gh extension install dlvhdr/gh-enhance >/dev/null 2>&1 && done_ "gh-enhance extension"
   else
     note "gh not authenticated — run 'gh auth login' then: gh extension install dlvhdr/gh-enhance"
   fi
@@ -242,10 +306,8 @@ if command -v intelli-shell &>/dev/null; then
   CMD_FILE="$DOTFILES_DIR/private_dot_config/intelli-shell/commands.yml"
   if [ -f "$CMD_FILE" ]; then
     if [ -t 0 ]; then
-      # Interactive: ask the user
       read -rp "  60+ stack commands ready. Prepopulate intelli-shell? [Y/n] " ans
     else
-      # Non-interactive (piped/scripted): default to yes
       ans="y"
     fi
     if [[ "$ans" != "n" && "$ans" != "N" ]]; then
@@ -259,7 +321,29 @@ else
   note "intelli-shell not installed — skipping command index"
 fi
 
-# ── Done — run doctor ─────────────────────────────────────────────────────────
-echo
-printf "\033[1;36m── Setup complete. Running doctor...\033[0m\n"
+# ── Summary ───────────────────────────────────────────────────────────────────
+printf "\n"
+printf "${CYAN}╔══════════════════════════════════════════════════╗${RESET}\n"
+printf "${CYAN}║${RESET}                                              ${CYAN}║${RESET}\n"
+printf "${CYAN}║${RESET}  ${BOLD}${GREEN}✓  Setup Complete${RESET}                        ${CYAN}║${RESET}\n"
+printf "${CYAN}║${RESET}                                              ${CYAN}║${RESET}\n"
+printf "${CYAN}╚══════════════════════════════════════════════════╝${RESET}\n"
+printf "\n"
+
+printf "  ${DIM}Installed:${RESET}  ${GREEN}${INSTALLED} packages${RESET}\n"
+printf "  ${DIM}Skipped:${RESET}    ${BLUE}${SKIPPED} already present${RESET}\n"
+if [ "$NOTES" -gt 0 ]; then
+  printf "  ${DIM}Notes:${RESET}      ${YELLOW}${NOTES} items need attention${RESET}\n"
+fi
+printf "\n"
+
+printf "  ${DIM}Next steps:${RESET}\n"
+printf "  ${GREEN}→${RESET} Open a new terminal to activate your stack\n"
+printf "  ${GREEN}→${RESET} Run ${BOLD}dashboard${RESET} to see your stack status\n"
+printf "  ${GREEN}→${RESET} Run ${BOLD}cheat --start${RESET} for the interactive tour\n"
+printf "  ${GREEN}→${RESET} Run ${BOLD}doctor.sh${RESET} to verify 40/40 health\n"
+printf "\n"
+
+# ── Run doctor ────────────────────────────────────────────────────────────────
+printf "${DIM}── Running health check...${RESET}\n\n"
 bash "$TOOLKIT_DIR/doctor.sh"
