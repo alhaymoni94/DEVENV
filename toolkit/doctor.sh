@@ -37,6 +37,7 @@ else
   CAPS_NOTE="GNOME Settings → Keyboard → Special Character Entry → Caps Lock behavior"
 fi
 BREW="$BREW_PREFIX/bin/brew"
+export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$BREW_PREFIX/bin:$PATH"
 
 printf "${CYAN}╔══════════════════════════════════════╗${RESET}\n"
 printf "${CYAN}║   Terminal Stack Doctor              ║${RESET}\n"

@@ -192,6 +192,28 @@
 - description: "Render Mermaid diagram to PNG"
   command: "mmdc -i diagram.mmd -o diagram.png"
 
+# ── Terminal Tools (glow + diffnav + treemd) ─────────────────────────────────
+
+- description: "Render markdown file in terminal"
+  command: "glow file.md"
+
+- description: "Render README from git repo"
+  command: "glow repo-url"
+
+- description: "Navigate git diffs interactively"
+  command: "diffnav"
+
+- description: "Show directory tree with markdown preview"
+  command: "treemd"
+
+# ── GitHub Dashboard (gh-dash) ────────────────────────────────────────────────
+
+- description: "Open GitHub PR/Issue dashboard"
+  command: "gh-dash"
+
+- description: "Filter dashboard by repository"
+  command: "gh-dash -R owner/repo"
+
 # ── Cheat System ──────────────────────────────────────────────────────────────
 
 - description: "Open interactive cheatsheet browser"
@@ -211,6 +233,18 @@
 
 - description: "List all available cheatsheets"
   command: "cheat --list"
+
+- description: "Open undo guide for a tool"
+  command: "cheat --undo tool-name"
+
+- description: "Open workflow guide"
+  command: "cheat --workflow name"
+
+- description: "Show daily tip"
+  command: "cheat --daily"
+
+- description: "Start cheatsheet browser from beginning"
+  command: "cheat --start"
 
 # ── Workflows ─────────────────────────────────────────────────────────────────
 
