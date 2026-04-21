@@ -3,7 +3,8 @@
 
 set -euo pipefail
 
-STUDENT_DIR="$HOME/students/$(whoami)"
+CAMP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+STUDENT_DIR="$CAMP_DIR/students/$(whoami)"
 
 # Colors
 GREEN="\033[32m"
@@ -37,7 +38,7 @@ echo ""
 next_found=false
 for phase in $(seq 1 6); do
     phase_dir="$STUDENT_DIR/phase-$phase"
-    material_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/material/phase-$phase"
+            material_dir="$CAMP_DIR/material/phase-$phase"
 
     if [ -d "$material_dir" ]; then
         for lesson_material in "$material_dir"/lesson-*/; do

@@ -5,9 +5,9 @@
 #   evaluate.sh john               # evaluate john's latest submission
 #   evaluate.sh john 1             # evaluate john's phase 1
 
-set -euo pipefail
+set -uo pipefail
 
-CAMP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+CAMP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 STUDENTS_DIR="$CAMP_DIR/students"
 
 # Colors
@@ -190,7 +190,7 @@ evaluate_phase() {
         grade="${RED}FAIL${RESET}"
     fi
 
-    printf "  ${BOLD}Score: ${score}/${max_score} (${pct}%) — ${grade}${RESET}\n"
+    echo -e "  ${BOLD}Score: ${score}/${max_score} (${pct}%) — ${grade}${RESET}"
 
     if [ ${#issues[@]} -gt 0 ]; then
         echo ""

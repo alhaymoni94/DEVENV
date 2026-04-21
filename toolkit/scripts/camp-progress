@@ -3,9 +3,9 @@
 
 set -euo pipefail
 
-STUDENT_DIR="$HOME/students/$(whoami)"
+CAMP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+STUDENT_DIR="$CAMP_DIR/students/$(whoami)"
 TOTAL_PHASES=6
-TOTAL_LESSONS=18
 
 # Colors
 GREEN="\033[32m"
@@ -18,7 +18,7 @@ BOLD="\033[1m"
 
 if [ ! -d "$STUDENT_DIR" ]; then
     echo -e "${RED}✗${RESET} Student directory not found: $STUDENT_DIR"
-    echo -e "${DIM}Run setup.sh first.${RESET}"
+    echo -e "${DIM}Copy the template: cp -r students/template students/\$(whoami)${RESET}"
     exit 1
 fi
 
@@ -32,40 +32,50 @@ total=0
 
 for phase in $(seq 1 $TOTAL_PHASES); do
     phase_dir="$STUDENT_DIR/phase-$phase"
+    material_dir="$CAMP_DIR/material/phase-$phase"
     lesson_count=0
     lesson_done=0
 
-    if [ -d "$phase_dir" ]; then
-        for lesson_dir in "$phase_dir"/lesson-*; do
-            if [ -d "$lesson_dir" ]; then
+    # Count expected lessons from material
+    if [ -d "$material_dir" ]; then
+        for mat_lesson in "$material_dir"/lesson-*/; do
+            if [ -d "$mat_lesson" ]; then
+                lesson_name=$(basename "$mat_lesson")
                 lesson_count=$((lesson_count + 1))
                 total=$((total + 1))
 
-                # Check if student-lab.md exists in the lesson directory (copied from material)
-                lab_file="$lesson_dir/student-lab.md"
-                # Check if any .py, .sh, or .md files exist (student work)
-                if find "$lesson_dir" -maxdepth 1 \( -name "*.py" -o -name "*.sh" -o -name "*.txt" -o -name "*.csv" -o -name "*.json" \) -print -quit 2>/dev/null | grep -q .; then
+                # Check if student has work in this lesson
+                student_lesson="$phase_dir/$lesson_name"
+                if [ -d "$student_lesson" ] && find "$student_lesson" -maxdepth 1 \( -name "*.py" -o -name "*.sh" -o -name "*.txt" -o -name "*.csv" -o -name "*.json" -o -name "*.yaml" -o -name "*.yml" -o -name "*.toml" -o -name "*.sql" -o -name "*.html" \) -print -quit 2>/dev/null | grep -q .; then
                     lesson_done=$((lesson_done + 1))
                     completed=$((completed + 1))
-                    echo -e "  ${GREEN}✓${RESET} Phase $phase, Lesson $(basename "$lesson_dir")"
+                    echo -e "  ${GREEN}✓${RESET} Phase $phase, Lesson $lesson_name"
+                elif [ -d "$student_lesson" ]; then
+                    echo -e "  ${DIM}○${RESET} Phase $phase, Lesson $lesson_name ${DIM}(started, no work files)${RESET}"
                 else
-                    echo -e "  ${DIM}○${RESET} Phase $phase, Lesson $(basename "$lesson_dir") ${DIM}(not started)${RESET}"
+                    echo -e "  ${DIM}○${RESET} Phase $phase, Lesson $lesson_name ${DIM}(not started)${RESET}"
                 fi
             fi
         done
     fi
 
     if [ $lesson_count -eq 0 ]; then
-        echo -e "  ${DIM}○${RESET} Phase $phase ${DIM}(not started)${RESET}"
+        echo -e "  ${DIM}○${RESET} Phase $phase ${DIM}(no lessons defined)${RESET}"
     elif [ $lesson_done -eq $lesson_count ]; then
         echo -e "  ${GREEN}✓${RESET} Phase $phase ${GREEN}(complete)${RESET}"
+    elif [ $lesson_done -gt 0 ]; then
+        echo -e "  ${YELLOW}◐${RESET} Phase $phase ${YELLOW}($lesson_done/$lesson_count lessons)${RESET}"
     else
-        echo -e "  ${YELLOW}◐${RESET} Phase $phase ${YELLOW}($lesson_done/$lesson_done lessons)${RESET}"
+        echo -e "  ${DIM}○${RESET} Phase $phase ${DIM}($lesson_count lessons pending)${RESET}"
     fi
 done
 
 echo ""
-pct=$(( completed * 100 / total ))
+if [ "$total" -gt 0 ]; then
+    pct=$(( completed * 100 / total ))
+else
+    pct=0
+fi
 bar_len=30
 filled=$(( pct * bar_len / 100 ))
 empty=$(( bar_len - filled ))
@@ -83,7 +93,7 @@ echo -e "  ${DIM}Completed: ${completed}/${total} lessons${RESET}"
 echo ""
 echo -e "${CYAN}── Milestones ──${RESET}"
 
-if bash toolkit/doctor.sh 2>&1 | grep -q "40 passed"; then
+if bash "$CAMP_DIR/doctor.sh" 2>&1 | grep -q "40 passed"; then
     echo -e "  ${GREEN}✓${RESET} Setup complete (40/40 health)"
 else
     echo -e "  ${RED}✗${RESET} Setup incomplete — run setup.sh"

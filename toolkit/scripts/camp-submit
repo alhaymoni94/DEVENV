@@ -4,7 +4,8 @@
 
 set -euo pipefail
 
-STUDENT_DIR="$HOME/students/$(whoami)"
+CAMP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+STUDENT_DIR="$CAMP_DIR/students/$(whoami)"
 PHASE="${1:?Usage: camp-submit <phase-number>}"
 
 # Colors
