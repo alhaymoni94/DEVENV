@@ -1,42 +1,92 @@
 # Yazi Undo Guide
-> "I messed up, how do I fix it?"
+> "I deleted/moved/renamed files by accident in yazi"
 
-## I trashed a file I didn't mean to
+## I deleted a file by accident
+
+Yazi moves deleted files to trash by default:
+
 ```bash
+# Check trash location
 ls ~/.local/share/Trash/files/
-mv ~/.local/share/Trash/files/<filename> ./destination/
+
+# Restore a file
+mv ~/.local/share/Trash/files/filename ./
+
+# Or use trash-cli to list and restore
+trash-list
+trash-restore
 ```
 
-## I permanently deleted a file
-No undo available. Check git if tracked:
+## I moved a file to the wrong location
+
 ```bash
-git checkout -- <file>
+# Move it back
+mv /wrong/path/filename /correct/path/
+
+# If you don't remember where it was:
+find /home -name "filename" 2>/dev/null
 ```
 
-## I'm lost in the directory tree
+## I renamed a file and want to revert
+
 ```bash
-~                          # go home
--                          # go to previous directory
-/                          # search for a filename
+# Rename back
+mv new-name old-name
+
+# Or if you forgot the original name, check yazi's log
+cat ~/.local/state/yazi/yazi.log | tail -50
 ```
 
-## I pasted files to the wrong location
+## I overwrote a file by accident
+
 ```bash
-# Navigate to wrong location, select the pasted files:
-Space → select files
-Ctrl+X → cut
-Navigate to correct location
-Ctrl+V → paste
+# If tracked by git:
+git checkout -- filename
+
+# If you have a backup:
+cp backup-file filename
+
+# Check if yazi created a backup
+ls ~/.local/share/yazi/backups/
 ```
 
-## I can't find a hidden file
+## I'm lost in the file system
+
 ```bash
-.                          # toggle hidden files visibility
+# Go to home directory
+~
+
+# Go to previous directory
+-
+
+# Go to project root (if in a git repo)
+git rev-parse --show-toplevel
 ```
 
-## I renamed a file incorrectly
+## I accidentally selected multiple files
+
 ```bash
-r                          # rename it back
-# Or in shell:
-mv wrong-name correct-name
+# Clear selection
+Escape
+
+# Or press v to toggle visual mode off
 ```
+
+## Prevention Tips
+
+1. **Enable trash**: Yazi uses trash by default on Linux
+2. **Confirm deletes**: Add to `~/.config/yazi/yazi.toml`:
+   ```toml
+   [manager]
+   show_hidden = false
+   ```
+3. **Use git**: Track important files so you can always revert
+4. **Backup first**: Before bulk operations, copy files to a backup folder
+
+## Recovery checklist
+
+1. Check `~/.local/share/Trash/files/`
+2. Run `trash-list`
+3. Check git status: `git status`
+4. Search for file: `find ~ -name "filename"`
+5. Check yazi logs: `cat ~/.local/state/yazi/yazi.log`

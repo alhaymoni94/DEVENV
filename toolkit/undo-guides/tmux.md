@@ -1,39 +1,71 @@
 # Tmux Undo Guide
-> "I messed up, how do I fix it?"
+> "I closed a pane/window/session by accident — how do I get it back?"
 
-## I killed the wrong pane
-Pane content is gone, but the session is still alive:
-```bash
-Prefix d                   # detach
-tmux attach -t session-name  # reattach
+## I closed a pane by accident
+Tmux doesn't have an "undo pane close" — but you can:
 ```
-The other panes in the window are still there.
-
-## I can't find my session
-```bash
-tmux ls                    # list all sessions
-tmux attach -t <name>      # attach to one
+Ctrl+B, %                    # recreate vertical split
+Ctrl+B, "                    # recreate horizontal split
 ```
+**Prevention**: Use `Ctrl+B, x` (with confirmation prompt) instead of `Ctrl+D`.
 
-## I messed up my layout
-```bash
-Prefix r                   # reload config (panes persist)
-# Or manually rearrange:
-Prefix |                   # split horizontal
-Prefix -                   # split vertical
-Prefix x                   # kill unwanted pane
+## I closed a window by accident
 ```
+Ctrl+B, c                    # create a new window
+Ctrl+B, 0-9                  # switch back to the window you need
+```
+**Tip**: Name your windows so you can find them: `Ctrl+B, ,` then type a name.
 
-## I accidentally detached
+## I detached from a session
+Your session is still running! Reattach:
 ```bash
-tmux attach                # reattach to most recent session
-tmux attach -t <name>      # reattach to specific session
+tmux attach                  # reattach to last session
+tmux attach -t session-name  # reattach to specific session
+tmux ls                      # list all sessions
 ```
 
-## I can't tell if I pressed the prefix
-Look at the right side of the status bar — the `PREFIX` indicator lights up in purple when you've pressed `Ctrl+a`.
-
-## My pane is frozen
+## I killed a session by accident
+If you ran `tmux kill-session`, the processes inside are gone.
+However, if you had scrollback you need:
 ```bash
-Ctrl+Q                     # unfreeze (accidental Ctrl+S locks terminal)
+# If you enabled logging (recommended):
+ls ~/tmux-logs/              # check saved logs
 ```
+**Prevention**: Add this to `~/.tmux.conf`:
+```
+bind K confirm-before -p "Kill session #S? (y/n)" kill-session
+```
+
+## I lost my scrollback buffer
+```
+Ctrl+B, [                    # enter copy mode
+# Use arrow keys or vim keys to scroll
+# Press q to exit copy mode
+```
+**Increase buffer size** in `~/.tmux.conf`:
+```
+set -g history-limit 50000
+```
+
+## I messed up my tmux config
+```bash
+# Reload the default config
+tmux source-file ~/.tmux.conf
+
+# If tmux is broken entirely:
+# Kill all sessions and start fresh
+tmux kill-server
+tmux                         # start new session with defaults
+```
+
+## I accidentally sent a key to the wrong pane
+```
+Ctrl+B, :                    # open tmux command prompt
+send-keys -t pane-index C-c  # send Ctrl+C to specific pane
+```
+
+## Recovery checklist
+1. `tmux ls` — find your sessions
+2. `tmux attach -t <name>` — reattach
+3. Recreate panes/windows as needed
+4. Check logs if you had them enabled
