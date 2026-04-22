@@ -1,0 +1,12 @@
+[
+  {"id": 1, "name": "Widget A", "price": 25.99, "category": "widgets", "stock": 150, "rating": 4.5},
+  {"id": 2, "name": "Widget B", "price": 34.99, "category": "widgets", "stock": 89, "rating": 4.2},
+  {"id": 3, "name": "Gadget X", "price": 49.99, "category": "gadgets", "stock": 200, "rating": 4.8},
+  {"id": 4, "name": "Gadget Y", "price": 79.99, "category": "gadgets", "stock": 45, "rating": 4.1},
+  {"id": 5, "name": "Tool A", "price": 15.99, "category": "tools", "stock": 300, "rating": 3.9},
+  {"id": 6, "name": "Tool B", "price": 22.99, "category": "tools", "stock": 175, "rating": 4.3},
+  {"id": 7, "name": "Widget C", "price": 29.99, "category": "widgets", "stock": 120, "rating": 4.6},
+  {"id": 8, "name": "Gadget Z", "price": 99.99, "category": "gadgets", "stock": 30, "rating": 4.9},
+  {"id": 9, "name": "Tool C", "price": 18.99, "category": "tools", "stock": 250, "rating": 4.0},
+  {"id": 10, "name": "Widget D", "price": 39.99, "category": "widgets", "stock": 95, "rating": 4.4}
+]
