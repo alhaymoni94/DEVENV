@@ -241,13 +241,18 @@ brew_install chezmoi
 if chezmoi status &>/dev/null 2>&1; then
   skip "chezmoi already initialized"
 else
-  chezmoi init --source "$DOTFILES_DIR" >/dev/null 2>&1 && done_ "chezmoi init"
+  chezmoi init --source "$DOTFILES_DIR" >/dev/null 2>&1 && done_ "chezmoi init" || note "chezmoi init failed — run: chezmoi init --source $DOTFILES_DIR"
 fi
 
-absorb() { local file="$1"; [ -f "$file" ] && ! chezmoi managed "$file" &>/dev/null 2>&1 && chezmoi add "$file" >/dev/null 2>&1 && done_ "absorbed $file"; }
+absorb() {
+  local file="$1"
+  [ -f "$file" ] || return 0
+  chezmoi managed "$file" &>/dev/null 2>&1 && return 0
+  chezmoi add "$file" >/dev/null 2>&1 && done_ "absorbed $file" || true
+}
 absorb "$HOME/.tmux.conf"
 absorb "$HOME/.zshrc"
-chezmoi apply --force --no-pager 2>/dev/null && done_ "chezmoi apply"
+chezmoi apply --force --no-pager 2>/dev/null && done_ "chezmoi apply" || note "chezmoi apply had issues — run: chezmoi apply --force"
 
 step "Runtimes + Dev Tools"
 for pkg in mise fzf glow lazygit lazydocker btop yazi "dlvhdr/formulae/diffnav" treemd d2; do brew_install "$pkg"; done
