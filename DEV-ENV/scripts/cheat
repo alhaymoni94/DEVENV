@@ -316,7 +316,7 @@ _cmd_search() {
   printf "${CYAN}  ╚══════════════════════════════════════════╝${RESET}\n\n"
 
   local found=0
-  local dirs=("$TOOLS_DIR" "$WORKFLOWS_DIR" "$QUICKREF_DIR" "$UNDO_DIR" "$QUIZ_DIR")
+  local dirs=("$TOOLS_DIR" "$WORKFLOWS_DIR" "$CONCEPTS_DIR" "$QUICKREF_DIR" "$UNDO_DIR" "$QUIZ_DIR")
 
   for dir in "${dirs[@]}"; do
     [[ -d "$dir" ]] || continue
@@ -411,7 +411,7 @@ _cmd_quiz() {
     exit 1
   }
 
-  local questions=() answers=() line i=0 total correct=0
+  local questions=() answers=() line i=0 total correct=0 has_any_answer=false
   while IFS= read -r line; do
     if [[ "$line" =~ ^Q:\ (.+) ]]; then
       questions+=("${BASH_REMATCH[1]}")
@@ -438,8 +438,9 @@ _cmd_quiz() {
 
     # Score if user typed something
     if [ -n "$user_answer" ]; then
+      has_any_answer=true
       local correct_answer="${answers[$((i-1))]}"
-      if echo "$user_answer" | grep -qi "$correct_answer"; then
+      if echo "$user_answer" | grep -qiF "$correct_answer"; then
         printf "  ${GREEN}  ✓ Correct!${RESET}\n\n"
         ((correct++))
       else
@@ -451,7 +452,7 @@ _cmd_quiz() {
   done
 
   printf "  ${CYAN}  ═══════════════════════════════════════════${RESET}\n"
-  if [ -n "$user_answer" ]; then
+  if $has_any_answer; then
     printf "  ${BOLD}Score: %d/%d (%d%%)${RESET}\n\n" "$correct" "$total" "$(( correct * 100 / total ))"
   else
     printf "  ${DIM}Review mode — type answers next time to track score.${RESET}\n\n"

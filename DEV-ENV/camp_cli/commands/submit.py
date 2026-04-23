@@ -38,7 +38,10 @@ def run(args: argparse.Namespace) -> int:
         print(f"{Colors.DIM}Initializing git repository...{Colors.RESET}")
         subprocess.run(["git", "init", str(sdir)], check=True, capture_output=True)
 
-    # Check for changes
+    # Stage all changes first
+    subprocess.run(["git", "-C", str(sdir), "add", "-A"], check=True, capture_output=True)
+
+    # Check if there are staged changes to commit
     result = subprocess.run(
         ["git", "-C", str(sdir), "diff", "--cached", "--quiet"],
         capture_output=True,
@@ -48,7 +51,6 @@ def run(args: argparse.Namespace) -> int:
         print(f"{Colors.DIM}Add your work files first, then re-run camp submit.{Colors.RESET}")
         return 0
 
-    subprocess.run(["git", "-C", str(sdir), "add", "-A"], check=True, capture_output=True)
     subprocess.run(
         ["git", "-C", str(sdir), "commit", "-m", f"submit: phase-{phase} complete"],
         check=True,

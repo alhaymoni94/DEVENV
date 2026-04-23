@@ -238,7 +238,11 @@ brew_install micro
 
 step "Chezmoi — dotfiles manager"
 brew_install chezmoi
-chezmoi status &>/dev/null 2>&1 && skip "chezmoi already initialized" || chezmoi init --source "$DOTFILES_DIR" >/dev/null 2>&1 && done_ "chezmoi init"
+if chezmoi status &>/dev/null 2>&1; then
+  skip "chezmoi already initialized"
+else
+  chezmoi init --source "$DOTFILES_DIR" >/dev/null 2>&1 && done_ "chezmoi init"
+fi
 
 absorb() { local file="$1"; [ -f "$file" ] && ! chezmoi managed "$file" &>/dev/null 2>&1 && chezmoi add "$file" >/dev/null 2>&1 && done_ "absorbed $file"; }
 absorb "$HOME/.tmux.conf"
@@ -247,7 +251,6 @@ chezmoi apply --force --no-pager 2>/dev/null && done_ "chezmoi apply"
 
 step "Runtimes + Dev Tools"
 for pkg in mise fzf glow lazygit lazydocker btop yazi "dlvhdr/formulae/diffnav" treemd d2; do brew_install "$pkg"; done
-brew_install diffnav
 
 step "Data, Notebooks & AI"
 brew_install opencode
@@ -255,7 +258,7 @@ uv_tool_install visidata vd
 uv_tool_install euporie
 brew_install llmfit
 
-[ -x "$_SCRIPTS_DIR/ai" ] && done_ "ai wrapper (opencode)" || note "ai wrapper script not found"
+[ -x "$TOOLKIT_DIR/scripts/ai" ] && done_ "ai wrapper (opencode)" || note "ai wrapper script not found"
 brew_install intelli-shell
 
 command -v mmdc &>/dev/null && skip "mmdc" || {
@@ -292,7 +295,7 @@ command -v intelli-shell &>/dev/null && {
 CAMP_DIR="$(cd "$TOOLKIT_DIR/.." && pwd)"
 STUDENT_WORKSPACE="$CAMP_DIR/students/${STUDENT_NAME:-$(whoami)}"
 if [ ! -d "$STUDENT_WORKSPACE" ]; then
-  cp -r "$TOOLKIT_DIR/students/template" "$STUDENT_WORKSPACE"
+  cp -r "$CAMP_DIR/students/template" "$STUDENT_WORKSPACE"
   [ -t 0 ] && printf "  ${GREEN}✓${RESET} Student workspace created: ${BOLD}students/${STUDENT_NAME:-$(whoami)}${RESET}\n"
 else
   [ -t 0 ] && printf "  ${BLUE}·${RESET} Student workspace already exists\n"

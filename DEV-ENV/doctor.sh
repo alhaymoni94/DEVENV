@@ -181,8 +181,6 @@ if command -v intelli-shell &>/dev/null; then
 else
   fail "intelli-shell" "brew install intelli-shell"
 fi
-command -v opencode &>/dev/null && ok "opencode" || warn "opencode" "brew install anomalyco/tap/opencode (optional)"
-
 # Check AI connectivity (optional)
 if command -v opencode &>/dev/null; then
   if opencode --version >/dev/null 2>&1; then
