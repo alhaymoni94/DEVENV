@@ -28,10 +28,10 @@ stop_spinner() {
   spinner_pid=""; printf "\r${DIM}                                             ${RESET}\r"
 }
 
-step()  { ((CURRENT_PHASE++)); local pct=$(( CURRENT_PHASE * 100 / TOTAL_PHASES )); local filled=$(( pct / 5 )); local empty=$(( 20 - filled )); local bar=""; for ((i=0; i<filled; i++)); do bar="${bar}█"; done; for ((i=0; i<empty; i++)); do bar="${bar}░"; done; printf "\n${CYAN}── Phase %d/%d: %s${RESET}\n" "$CURRENT_PHASE" "$TOTAL_PHASES" "$1"; printf "${DIM}   [%s] %d%%%s\n" "$bar" "$pct" "$RESET"; }
-done_() { ((INSTALLED++)); printf "  ${GREEN}✓${RESET} %s\n" "$1"; }
-skip()  { ((SKIPPED++)); printf "  ${BLUE}·${RESET} %s\n" "$1"; }
-note()  { ((NOTES++)); printf "  ${YELLOW}!${RESET} %s\n" "$1"; }
+step()  { CURRENT_PHASE=$(( CURRENT_PHASE + 1 )); local pct=$(( CURRENT_PHASE * 100 / TOTAL_PHASES )); local filled=$(( pct / 5 )); local empty=$(( 20 - filled )); local bar=""; for ((i=0; i<filled; i++)); do bar="${bar}█"; done; for ((i=0; i<empty; i++)); do bar="${bar}░"; done; printf "\n${CYAN}── Phase %d/%d: %s${RESET}\n" "$CURRENT_PHASE" "$TOTAL_PHASES" "$1"; printf "${DIM}   [%s] %d%%%s\n" "$bar" "$pct" "$RESET"; }
+done_() { INSTALLED=$(( INSTALLED + 1 )); printf "  ${GREEN}✓${RESET} %s\n" "$1"; }
+skip()  { SKIPPED=$(( SKIPPED + 1 )); printf "  ${BLUE}·${RESET} %s\n" "$1"; }
+note()  { NOTES=$(( NOTES + 1 )); printf "  ${YELLOW}!${RESET} %s\n" "$1"; }
 die()   { printf "  ${RED}✗${RESET} %s\n" "$1"; exit 1; }
 
 ask() {
