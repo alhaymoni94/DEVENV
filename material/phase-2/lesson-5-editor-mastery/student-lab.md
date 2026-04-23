@@ -237,6 +237,19 @@ python ~/projects/word-counter.py test.txt
 
 ---
 
+## Deliverables
+
+Save your work in `students/YOUR_NAME/phase-2/lesson-5-editor-mastery/`:
+
+| File | Description |
+|------|-------------|
+| `replace-test.txt` | Find-and-replace result (Exercise 3) |
+| `comment-test.py` | Comment/duplicate test (Exercise 6) |
+| `word-counter.py` | Word frequency counter (Exercise 8) |
+| `settings.json` | Micro config (Exercise 7, copy from `~/.config/micro/`) |
+
+---
+
 ## Self-Assessment
 
 Rate yourself (1-5):

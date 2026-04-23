@@ -70,37 +70,11 @@ Create a comprehensive Linux camp focused on terminal-based workflows, developme
     - Setting up local AI models
     - Developing and deploying AI applications locally
 
-### **Phase 5: Advanced Topics**
-13. **TUI Coding Agents**
-    - Introduction to terminal-based AI agents
-    - Integration with development workflows
-    - Automating repetitive tasks
-
-14. **Synthetic Data Generation**
-    - Introduction to synthetic data generation
-    - Tools and techniques for generating synthetic data
-    - Evaluating synthetic data quality
-    - Use cases for synthetic data in AI and machine learning
-
-15. **AI Models Management Locally (MLOps, DataOps, DevOps)**
-    - Introduction to MLOps, DataOps, and DevOps
-    - Managing AI models locally
-    - Model training, evaluation, and deployment
-    - Versioning and tracking experiments
-
-16. **SDLC Using AI Agents**
-    - AI-assisted code generation and review
-    - Automated testing and deployment pipelines
-    - CI/CD integration with AI tools
-
-### **Phase 6: Workspace Automation**
-17. **Workspace Automation**
-    - Scripting for data synchronization (e.g., sync-data.sh)
-    - Diagnostic scripts for connectivity (e.g., client-doctor.sh)
-    - Importing and transforming data (e.g., import-obsidian-vault.sh)
+### ~~Phase 5: Advanced Topics~~ (archived for v1.1)
+### ~~Phase 6: Workspace Automation~~ (archived for v1.1)
 
 ## Structure
-- **Duration**: 4-6 weeks (adjustable)
+- **Duration**: 3-4 weeks (adjustable)
 - **Format**: Hands-on labs, workshops, and projects
 - **Assessment**: Practical exercises and a final project
 

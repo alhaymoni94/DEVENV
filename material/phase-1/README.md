@@ -8,7 +8,7 @@ Phase 1 introduces students to the terminal environment and AI-assisted workflow
 
 | # | Topic | Duration | Key Tools |
 |---|-------|----------|-----------|
-| 1 | AI Agents in the Terminal | 1.5 hours | aichat, opencode, cheat |
+| 1 | AI Agents in the Terminal | 1.5 hours | ai, opencode, cheat |
 | 2 | Unix Fundamentals | 2 hours | zsh, micro, yazi, fzf |
 | 3 | Tmux Mastery | 1.5 hours | tmux |
 | 4 | Git Workflow | 2 hours | lazygit, gh, git |
@@ -31,6 +31,6 @@ By the end of Phase 1, students will be able to:
 
 ## Setup Requirements
 
-- `setup.sh` completed with 40/40 health
-- AI API key configured for `aichat`
-- GitHub account for `gh` authentication
+- `setup.sh` completed with core tools passing
+- AI API key configured in `~/.opencode.json` (optional)
+- GitHub account for `gh` authentication (optional, for Lesson 4)

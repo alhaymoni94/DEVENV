@@ -56,7 +56,7 @@ A complete Linux terminal training camp where:
 | # | Goal | Metric |
 |---|------|--------|
 | G1 | Students can set up their environment in < 15 min | `setup.sh` completes, `doctor.sh` shows 40/40 |
-| G2 | Students complete all 6 phases | 18/18 lessons completed |
+| G2 | Students complete all 4 phases | 13/13 lessons completed |
 | G3 | Students pass automated evaluation | Score ≥ 80% per phase |
 | G4 | Supervisor can evaluate a phase in < 5 min | `evaluate.sh` runs automatically |
 | G5 | Students use self-help before asking humans | `cheat`, `ai`, `qr` used first |
@@ -105,8 +105,8 @@ A complete Linux terminal training camp where:
 │  └──────────────────────────────────────────────────┘   │
 │                                                          │
 │  ┌──────────────────────────────────────────────────┐   │
-│  │              AI Agents                            │   │
-│  │  aichat (quick Q&A), opencode (coding agent)     │   │
+│  │  AI Agents                            │   │
+│  │  ai (quick Q&A + pipe), opencode (coding agent)     │   │
 │  └──────────────────────────────────────────────────┘   │
 │                                                          │
 │  ┌──────────────────────────────────────────────────┐   │
@@ -148,8 +148,7 @@ AUT-Linux-Camp/
 │   ├── phase-2/               # Dev Environment (3 lessons)
 │   ├── phase-3/               # Data & AI (3 lessons)
 │   ├── phase-4/               # Containers & AI (3 lessons)
-│   ├── phase-5/               # Advanced Topics (4 lessons)
-│   └── phase-6/               # Automation (1 lesson)
+│   (phases 5-6 archived for future v1.1)
 └── students/                   # Student workspaces
     ├── template/              # Copy for each student
     └── <student-name>/        # Individual work
@@ -171,7 +170,7 @@ AUT-Linux-Camp/
 | 6 | Automation | 1 | 2h | Cron, backup, diagnostics |
 | — | Graduation Project | 1 | 4 weeks | Full stack application |
 
-**Total: 18 lessons, 33.5 hours instruction + 4-week project**
+**Total: 13 lessons, 25.5 hours instruction + 4-week project**
 
 ### Each Lesson Includes
 
@@ -279,15 +278,15 @@ AUT-Linux-Camp/
 | uv | Python tooling | pip |
 | mise | Runtime manager | brew |
 | gh | GitHub CLI | brew |
-| aichat | AI assistant | cargo |
+| ai | AI assistant (opencode wrapper) | toolkit/scripts |
 | opencode | AI coding agent | brew |
 | intelli-shell | Command history | brew |
 
 ### 10.3 AI Requirements
 
-- API key for aichat (OpenAI, Anthropic, or compatible)
-- opencode requires its own API configuration
-- Local models (ollama) optional for Phase 5+
+- API key configured in ~/.opencode.json (OpenAI, Anthropic, Gemini, or compatible)
+- opencode provides both one-shot and interactive modes
+- Local models (ollama) optional for advanced projects
 
 ---
 
@@ -327,7 +326,7 @@ AUT-Linux-Camp/
 - [x] Health check (40/40 checks)
 - [x] Welcome dashboard
 - [x] Cheat system (cheatsheets, quick-refs, undo-guides, quizzes, workflows)
-- [x] 18 lessons across 6 phases
+- [x] 13 lessons across 4 phases (phases 5-6 archived for v1.1)
 - [x] Student labs with exercises
 - [x] Instructor guides (Phases 1-3)
 - [x] Self-paced learning guide

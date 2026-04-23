@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# camp-next — deprecated wrapper, use: camp next
+set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CAMP_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+python3 "$CAMP_DIR/toolkit/scripts/camp" next "$@"

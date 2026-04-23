@@ -252,6 +252,16 @@ tmux kill-server
 
 ---
 
+## Deliverables
+
+Tmux is entirely interactive — there are no files to submit. However, the supervisor may ask you to demonstrate:
+
+- A running tmux session with multiple windows
+- A split-pane layout
+- Your customized `~/.tmux.conf`
+
+---
+
 ## Self-Assessment
 
 Rate yourself (1-5):

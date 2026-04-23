@@ -12,13 +12,10 @@ This camp is designed for **self-paced learning** with **supervisor evaluation**
 │ Foundations │   │ Dev Env     │   │ Data & AI   │   │ Containers  │
 │ 7 hours     │   │ 4.5 hours   │   │ 6 hours     │   │ 6 hours     │
 └─────────────┘   └─────────────┘   └─────────────┘   └─────────────┘
-       │                                                         │
-       ▼                                                         ▼
-┌─────────────┐   ┌─────────────┐
-│  Phase 5    │──▶│  Phase 6    │──▶  Graduation Project
-│ Advanced    │   │ Automation  │     (4 weeks)
-│ 8 hours     │   │ 2 hours     │
-└─────────────┘   └─────────────┘
+                                                          │
+                                                          ▼
+                                              Graduation Project
+                                                  (4 weeks)
 ```
 
 ## How to Progress
@@ -30,7 +27,7 @@ bash toolkit/setup.sh
 
 # Verify your stack is healthy
 doctor.sh
-# Must show 40/40 before proceeding
+# Core tools must pass. Warnings for optional tools (like AI) are OK.
 ```
 
 ### 2. Work Through Each Phase
@@ -64,9 +61,7 @@ Your supervisor will:
 | Phase 1 Pass | All labs completed, avg self-assessment ≥ 4 | Phase 2 |
 | Phase 2 Pass | Dotfiles customized, cheat system used | Phase 3 |
 | Phase 3 Pass | Data analysis script works | Phase 4 |
-| Phase 4 Pass | Containerized app runs | Phase 5 |
-| Phase 5 Pass | AI-assisted project works | Phase 6 |
-| Phase 6 Pass | Automation scripts run | Graduation Project |
+| Phase 4 Pass | Containerized app runs | Graduation Project |
 | Graduation | Project meets requirements | Certificate |
 
 ## Rules
@@ -74,8 +69,10 @@ Your supervisor will:
 1. **Complete exercises in order** — each builds on the previous
 2. **Fill in self-assessments honestly** — they guide your supervisor
 3. **Use the cheat system** — `cheat`, `qr`, `tip` are your first line of help
-4. **Ask AI before asking humans** — use `ai "your question"` first
+4. **Use available resources** — `man`, `cheat`, `ai` (if configured), or web search
 5. **Submit when ready** — don't rush, quality matters
+
+> **About AI:** AI tools (`ai`, `opencode`) are optional enhancements. Every lesson works without them. If you have a paid API key or personal subscription, use them. If not, use `man`, `cheat`, and the terminal's built-in help.
 
 ## Getting Help
 
@@ -84,10 +81,11 @@ Your supervisor will:
 | 1 | `cheat tool-name` | Quick reference |
 | 2 | `cheat --undo tool` | Something broke |
 | 3 | `qr tool-name` | One-page summary |
-| 4 | `ai "your question"` | Conceptual help |
-| 5 | `cheat --workflow name` | Step-by-step guides |
-| 6 | `cheat --quiz topic` | Test your knowledge |
-| 7 | Supervisor | Stuck after trying everything |
+| 4 | `man command` | Official documentation |
+| 5 | `ai "your question"` | Conceptual help (if AI configured) |
+| 6 | `cheat --workflow name` | Step-by-step guides |
+| 7 | `cheat --quiz topic` | Test your knowledge |
+| 8 | Supervisor | Stuck after trying everything |
 
 ## Your Workspace
 
@@ -104,10 +102,6 @@ students/YOUR_NAME/
 │   └── ...
 ├── phase-4/
 │   └── ...
-├── phase-5/
-│   └── ...
-├── phase-6/
-│   └── ...
 └── projects/        ← Personal projects
 ```
 
@@ -115,13 +109,13 @@ students/YOUR_NAME/
 
 ```bash
 # Check your progress
-camp-progress
+camp progress
 
 # See what's next
-camp-next
+camp next
 
 # Submit a phase
-camp-submit phase-1
+camp submit 1
 ```
 
 ---

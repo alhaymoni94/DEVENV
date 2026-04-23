@@ -1,7 +1,12 @@
 toolkit/dotfiles/.git/
 toolkit/dotfiles/.gitignore
+toolkit/.setup-config
 .opencode/
 claude-code-latest.txt
 scanned_document.pdf
 appsRepo.md
 mise.toml
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage

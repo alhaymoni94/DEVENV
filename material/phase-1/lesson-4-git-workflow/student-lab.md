@@ -373,6 +373,20 @@ git branch -d feat/complete-workflow
 
 ---
 
+## Deliverables
+
+Save your work in `students/YOUR_NAME/phase-1/lesson-4-git-workflow/`:
+
+| File | Description |
+|------|-------------|
+| `greet.py` | Greeting function (Exercise 3) |
+| `farewell.py` | Farewell function (Exercise 4) |
+| `message.txt` | Resolved merge conflict (Exercise 5) |
+| `src/app.py` | Main app (Exercise 7) |
+| `tests/test_app.py` | Test file (Exercise 7) |
+
+---
+
 ## Self-Assessment
 
 Rate yourself (1-5):

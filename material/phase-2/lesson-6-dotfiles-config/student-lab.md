@@ -218,6 +218,18 @@ Add under `[data]`:
 
 ---
 
+## Deliverables
+
+Save your work in `students/YOUR_NAME/phase-2/lesson-6-dotfiles-config/`:
+
+| File | Description |
+|------|-------------|
+| `starship.toml` | Customized prompt config (copy from `~/.config/starship/`) |
+| `tmux.conf` | Customized tmux config (copy from `~/.tmux.conf`) |
+| `settings.yaml` | Myapp config added to chezmoi (Exercise 5) |
+
+---
+
 ## Self-Assessment
 
 Rate yourself (1-5):

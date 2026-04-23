@@ -9,7 +9,7 @@ Phase 3 teaches students to handle data entirely from the terminal — CSV, JSON
 | # | Topic | Duration | Key Tools |
 |---|-------|----------|-----------|
 | 8 | Data Formats in the Terminal | 2 hours | visidata, glow, jq |
-| 9 | Data Manipulation with AI | 2 hours | aichat, awk, sed, visidata |
+| 9 | Data Manipulation with AI | 2 hours | ai, awk, sed, visidata |
 | 10 | Shell Scripting for Automation | 2 hours | bash, zsh, cron |
 
 ## Learning Objectives

@@ -1,0 +1,14 @@
+# AUT Linux Camp — Setup Configuration
+# Generated: 2026-04-23 00:00
+
+STUDENT_NAME="Student"
+STUDENT_EMAIL="student@aut.ac.nz"
+GITHUB_USERNAME="autstudent"
+GIT_EDITOR="micro"
+AI_PROVIDER="openai"
+AI_MODEL="gpt-4o"
+ENABLE_DOCKER="Y"
+ENABLE_AI="N"
+COLORSCHEME="gruvbox"
+TAB_SIZE="4"
+TIMEZONE="Pacific/Auckland"

@@ -8,7 +8,7 @@ Build a functional AI application using the skills learned throughout the camp. 
 
 ### Minimum Requirements (Pass)
 - [ ] A working application with at least 3 features
-- [ ] Uses at least one AI tool (aichat or opencode)
+- [ ] Uses at least one advanced technique (AI, automation, or data processing)
 - [ ] Containerized with Docker
 - [ ] Version controlled with git
 - [ ] Documented with a README
@@ -23,29 +23,29 @@ Build a functional AI application using the skills learned throughout the camp. 
 
 ## Project Ideas
 
-### 1. AI-Powered Code Review Tool
+### 1. Code Review Tool
 A CLI tool that:
 - Reads a git diff
-- Sends it to an AI model for review
+- Checks for common issues (long lines, missing docs, etc.)
 - Returns suggestions for improvements
 - Saves reports as markdown
 
-### 2. Terminal Dashboard with AI Insights
+### 2. Terminal Dashboard
 A dashboard that:
 - Shows system stats (CPU, RAM, disk)
 - Shows git activity
-- Uses AI to analyze logs and surface issues
+- Monitors log files for errors
 - Updates in real-time
 
 ### 3. Data Analysis Pipeline
 A pipeline that:
 - Downloads a dataset
-- Cleans it with AI assistance
+- Cleans it using Python/sed/awk
 - Performs analysis
 - Generates a markdown report
 - Runs on a schedule
 
-### 4. AI Chat Bot for Terminal
+### 4. Chat Bot for Terminal
 A chatbot that:
 - Runs entirely in the terminal
 - Has custom commands
@@ -55,9 +55,16 @@ A chatbot that:
 ### 5. Personal Knowledge Base
 A system that:
 - Stores notes in markdown
-- Uses AI to tag and categorize
+- Auto-tags based on content keywords
 - Supports full-text search
 - Generates summaries
+
+### 6. AI-Powered Variants (if you have AI configured)
+Any of the above projects enhanced with:
+- AI-generated code review comments
+- AI-powered log analysis
+- AI-assisted data cleaning
+- AI-generated summaries
 
 ## Deliverables
 

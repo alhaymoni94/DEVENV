@@ -1,0 +1,646 @@
+#!/usr/bin/env bash
+# cheat — Terminal stack interactive learning reference
+#
+# Usage:
+#   cheat                     visual stack map (default)
+#   cheat --browse            interactive TUI browser (requires fzf)
+#   cheat <topic>             open a topic directly
+#   cheat --list              print all available topics (plain, for scripting)
+#   cheat --start             first-run interactive tour
+#   cheat --quick <tool>      one-pager quick reference
+#   cheat --daily             random pro tip
+#   cheat --quiz <topic>      interactive self-test
+#   cheat --workflow <name>   multi-tool workflow guide
+#   cheat --undo <tool>       recovery guide
+#   cheat --search <term>     search across all cheatsheets
+
+# ── Resolve toolkit directory relative to this script ─────────────────────────
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TOOLKIT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+TOOLS_DIR="$TOOLKIT/cheatsheets"
+WORKFLOWS_DIR="$TOOLKIT/workflows"
+CONCEPTS_DIR="$TOOLKIT/concepts"
+QUICKREF_DIR="$TOOLKIT/quick-ref"
+UNDO_DIR="$TOOLKIT/undo-guides"
+PRACTICE_DIR="$TOOLKIT/practice"
+QUIZ_DIR="$PRACTICE_DIR/quizzes"
+
+# ── Colors (Tokyo Night palette) ──────────────────────────────────────────────
+BOLD="\033[1m"
+CYAN="\033[1;36m"
+YELLOW="\033[33m"
+GREEN="\033[32m"
+BLUE="\033[1;34m"
+DIM="\033[2m"
+RESET="\033[0m"
+
+HR="${DIM}  ─────────────────────────────────────────────────────${RESET}"
+
+# ── Render a markdown file to stdout or pager ─────────────────────────────────
+_render() {
+  local file="$1"
+  local use_pager="${2:-true}"
+
+  if command -v glow &>/dev/null; then
+    if [[ "$use_pager" == "true" ]]; then
+      glow -p "$file"
+    else
+      glow "$file"
+    fi
+  elif command -v bat &>/dev/null; then
+    if [[ "$use_pager" == "true" ]]; then
+      bat --style=plain --color=always "$file" | less -R
+    else
+      bat --style=plain --color=always "$file"
+    fi
+  else
+    less -R "$file"
+  fi
+}
+
+# ── Extract related topics from See Also sections ─────────────────────────────
+_extract_related() {
+  local file="$1"
+  [[ -f "$file" ]] || return
+  # Find lines like: - `cheat topic` or - cheat topic — and extract topic names
+  # Exclude flags (--undo, --quiz, etc.) by only capturing names without leading -
+  grep -iE '^\s*-\s*`?cheat\s+([a-z0-9_-]+)`?' "$file" 2>/dev/null | \
+    sed -E 's/.*cheat\s+([a-z0-9_-]+).*/\1/' | grep -v '^-' | head -6
+}
+
+# ── Interactive topic navigator ───────────────────────────────────────────────
+_navigate() {
+  local topic="${1:-}"
+  local file=""
+  local related=()
+  local choice=""
+  local nav_colors="\033[2m"
+  local nav_reset="\033[0m"
+  local nav_accent="\033[0;33m"
+  local nav_link="\033[0;36m"
+
+  while true; do
+    # Resolve topic to file
+    if [[ -n "$topic" ]]; then
+      file="$(_find_topic "$topic")"
+      if [[ -z "$file" ]]; then
+        printf "\n${YELLOW}  No topic found for '${topic}'.${RESET}\n\n"
+        topic=""
+        continue
+      fi
+    else
+      _home
+      printf "\n  ${nav_colors}→ type a topic, or [${nav_accent}b${nav_colors}]rowse [${nav_accent}q${nav_colors}]uit${nav_reset}\n"
+      printf "  ${nav_link}› ${nav_reset}"
+      if [ -t 0 ]; then
+        read -r choice
+      else
+        return 0
+      fi
+      case "$choice" in
+        q|'') return 0 ;;
+        b) topic=""; continue ;;
+        *) topic="$choice"; continue ;;
+      esac
+    fi
+
+    # Render the topic (ignore pager exit codes)
+    _render "$file" || true
+
+    # Extract related topics for quick-jump
+    related=()
+    local rel
+    while IFS= read -r rel; do
+      [[ -n "$rel" ]] && related+=("$rel")
+    done < <(_extract_related "$file")
+
+    # Also add undo/quiz variants if they exist
+    local base_name
+    base_name="$(basename "$file" .md)"
+    [[ -f "$UNDO_DIR/$base_name.md" ]] && related+=("undo/$base_name")
+    [[ -f "$QUIZ_DIR/$base_name.md" ]] && related+=("quiz/$base_name")
+
+    # Build navigation bar
+    printf "\n"
+    local i=0
+    local nav_line=""
+    for rel in "${related[@]}"; do
+      ((i++))
+      nav_line+="  [${nav_accent}${i}${nav_reset}] ${nav_link}${rel}${nav_reset}"
+      (( i % 3 == 0 )) && { printf "%s\n" "$nav_line"; nav_line=""; }
+    done
+    [[ -n "$nav_line" ]] && printf "%s\n" "$nav_line"
+
+    printf "  ${nav_colors}─────────────────────────────────────────${nav_reset}\n"
+    printf "  [${nav_accent}m${nav_reset}] ${nav_link}map${nav_reset}   [${nav_accent}b${nav_reset}] ${nav_link}browse${nav_reset}   [${nav_accent}s${nav_reset}] ${nav_link}search${nav_reset}   [${nav_accent}q${nav_reset}] ${nav_link}quit${nav_reset}\n"
+    printf "  ${nav_colors}→ topic name or number${nav_reset}\n"
+    printf "  ${nav_link}› ${nav_reset}"
+
+    if [ -t 0 ]; then
+      read -r choice
+    else
+      return 0
+    fi
+
+    # Handle choice
+    case "$choice" in
+      q|'') return 0 ;;
+      m) topic=""; ;;
+      b)
+        if command -v fzf &>/dev/null; then
+          local selected
+          selected=$(_list_all | fzf \
+            --prompt="  › " \
+            --header=$'  Terminal Stack Reference\n  ↑↓ navigate   Enter open   Esc quit\n' \
+            --border=rounded \
+            --height=80% \
+            --ansi 2>/dev/null) || true
+          [[ -n "$selected" ]] && topic="${selected#*/}" || topic=""
+        else
+          topic=""
+        fi
+        ;;
+      s)
+        printf "  ${nav_colors}Search term: ${nav_reset}"
+        local term
+        read -r term
+        [[ -n "$term" ]] && _cmd_search "$term"
+        ;;
+      [1-9])
+        local idx=$((choice - 1))
+        if [[ $idx -lt ${#related[@]} ]]; then
+          topic="${related[$idx]}"
+          topic="${topic#*/}"  # strip prefix like undo/
+        else
+          printf "  ${YELLOW}Invalid choice.${RESET}\n"
+          sleep 0.5
+        fi
+        ;;
+      *)
+        # Try as a topic name
+        if _find_topic "$choice" &>/dev/null; then
+          topic="$choice"
+        else
+          printf "  ${YELLOW}Unknown topic: ${choice}${RESET}\n"
+          sleep 0.5
+        fi
+        ;;
+    esac
+  done
+}
+
+# ── Find the file path for a given topic name ─────────────────────────────────
+_find_topic() {
+  local raw="$1"
+  local name="${raw#*/}"
+
+  local search_dirs=(
+    "$TOOLS_DIR"
+    "$WORKFLOWS_DIR"
+    "$CONCEPTS_DIR"
+    "$QUICKREF_DIR"
+    "$UNDO_DIR"
+    "$QUIZ_DIR"
+  )
+
+  for dir in "${search_dirs[@]}"; do
+    [[ -f "$dir/$name.md" ]] && echo "$dir/$name.md" && return 0
+  done
+  return 1
+}
+
+# ── List all topics with category prefix ─────────────────────────────────────
+_list_all() {
+  local f
+  for f in "$TOOLS_DIR"/*.md; do
+    [[ -f "$f" ]] && printf "cheatsheet/%s\n" "$(basename "$f" .md)"
+  done
+  for f in "$WORKFLOWS_DIR"/*.md; do
+    [[ -f "$f" ]] && printf "workflow/%s\n" "$(basename "$f" .md)"
+  done
+  for f in "$CONCEPTS_DIR"/*.md; do
+    [[ -f "$f" ]] && printf "concept/%s\n" "$(basename "$f" .md)"
+  done
+  for f in "$QUICKREF_DIR"/*.md; do
+    [[ -f "$f" ]] && printf "quick-ref/%s\n" "$(basename "$f" .md)"
+  done
+  for f in "$UNDO_DIR"/*.md; do
+    [[ -f "$f" ]] && printf "undo/%s\n" "$(basename "$f" .md)"
+  done
+  for f in "$QUIZ_DIR"/*.md; do
+    [[ -f "$f" ]] && printf "quiz/%s\n" "$(basename "$f" .md)"
+  done
+}
+
+# ── Count topics per category ─────────────────────────────────────────────────
+_count() {
+  local dir="$1"
+  local count=0
+  local f
+  for f in "$dir"/*.md; do
+    [[ -f "$f" ]] && ((count++))
+  done
+  echo "$count"
+}
+
+# ── Enhanced Stack Map (default cheat screen) ─────────────────────────────────
+_home() {
+  local _r='\033[0;31m' _g='\033[0;32m' _y='\033[0;33m' _b='\033[0;34m'
+  local _m='\033[0;35m' _c='\033[0;36m' _w='\033[1;37m' _d='\033[2m' _n='\033[0m'
+
+  # Header
+  printf "\n"
+  printf "${_c}  ╔══════════════════════════════════════════════════════════════════╗${_n}\n"
+  printf "${_c}  ║${_n}           ${_w}AUT LINUX CAMP  —  Terminal Stack Map${_n}                 ${_c}║${_n}\n"
+  printf "${_c}  ╚══════════════════════════════════════════════════════════════════╝${_n}\n\n"
+
+  # Foundation layer
+  printf "  ${_d}┌─────────────────────────────────────────────────────────────┐${_n}\n"
+  printf "  ${_d}│${_n}  WezTerm / Ghostty  →  tmux  →  zsh + Starship              ${_d}│${_n}\n"
+  printf "  ${_d}│${_n}  ${_d}(terminal)           (sessions)   (shell + prompt)        ${_d}│${_n}\n"
+  printf "  ${_d}└─────────────────────────────────────────────────────────────┘${_n}\n"
+  printf "                              ${_d}│${_n}\n"
+  printf "        ${_d}┌─────────────────────┼─────────────────────┐${_n}\n"
+  printf "        ${_d}│${_n}                     ${_d}│${_n}                     ${_d}│${_n}\n"
+
+  # Row 1: Edit | Files | Git
+  printf "   ${_c}┌────${_c}▼${_c}────┐${_n}          ${_y}┌────${_y}▼${_y}────┐${_n}          ${_g}┌────${_g}▼${_g}────┐${_n}\n"
+  printf "   ${_c}│${_w}  EDIT   ${_c}│${_n}          ${_y}│${_w}  FILES  ${_y}│${_n}          ${_g}│${_w}   GIT   ${_g}│${_n}\n"
+  printf "   ${_c}│${_n}  micro  ${_c}│${_n}          ${_y}│${_n}  yazi   ${_y}│${_n}          ${_g}│${_n} lazygit ${_g}│${_n}\n"
+  printf "   ${_c}│${_d}   (e)   ${_c}│${_n}          ${_y}│${_d}   (y)   ${_y}│${_n}          ${_g}│${_d}  (lg)   ${_g}│${_n}\n"
+  printf "   ${_c}└─────────┘${_n}          ${_y}└─────────┘${_n}          ${_g}└─────────┘${_n}\n"
+  printf "        ${_d}│${_n}                     ${_d}│${_n}                     ${_d}│${_n}\n"
+
+  # Row 2: AI | System | GitHub
+  printf "   ${_m}┌────${_m}▼${_m}────┐${_n}          ${_r}┌────${_r}▼${_r}────┐${_n}          ${_b}┌────${_b}▼${_b}────┐${_n}\n"
+  printf "   ${_m}│${_w}   AI    ${_m}│${_n}          ${_r}│${_w} SYSTEM  ${_r}│${_n}          ${_b}│${_w} GITHUB  ${_b}│${_n}\n"
+  printf "   ${_m}│${_n}   ai    ${_m}│${_n}          ${_r}│${_n}  btop   ${_r}│${_n}          ${_b}│${_n} gh-dash ${_b}│${_n}\n"
+  printf "   ${_m}│${_d} opencode${_m}│${_n}          ${_r}│${_d}  (top)  ${_r}│${_n}          ${_b}│${_d}  (ghd)  ${_b}│${_n}\n"
+  printf "   ${_m}└─────────┘${_n}          ${_r}└─────────┘${_n}          ${_b}└─────────┘${_n}\n"
+  printf "        ${_d}│${_n}                     ${_d}│${_n}                     ${_d}│${_n}\n"
+
+  # Row 3: Data | Diagrams | Help
+  printf "   ${_y}┌────${_y}▼${_y}────┐${_n}          ${_c}┌────${_c}▼${_c}────┐${_n}          ${_g}┌────${_g}▼${_g}────┐${_n}\n"
+  printf "   ${_y}│${_w}  DATA   ${_y}│${_n}          ${_c}│${_w} DIAGRAM ${_c}│${_n}          ${_g}│${_w}  HELP   ${_g}│${_n}\n"
+  printf "   ${_y}│${_n}visidata ${_y}│${_n}          ${_c}│${_n}   d2    ${_c}│${_n}          ${_g}│${_n}  cheat  ${_g}│${_n}\n"
+  printf "   ${_y}│${_d}  (vd)   ${_y}│${_n}          ${_c}│${_d}  mmdc   ${_c}│${_n}          ${_g}│${_d}  qr/tip ${_g}│${_n}\n"
+  printf "   ${_y}└─────────┘${_n}          ${_c}└─────────┘${_n}          ${_g}└─────────┘${_n}\n\n"
+
+  # Core workflow
+  printf "  ${_d}── Core Workflow ──────────────────────────────────────────────────${_n}\n"
+  printf "  ${_w}y${_n} → ${_w}e${_n} → ${_w}lg${_n} → ${_w}ghd${_n}        ${_d}browse → edit → commit → review${_n}\n\n"
+
+  # Learn section
+  local tools_count workflows_count concepts_count quickref_count undo_count quiz_count
+  tools_count="$(_count "$TOOLS_DIR")"
+  workflows_count="$(_count "$WORKFLOWS_DIR")"
+  concepts_count="$(_count "$CONCEPTS_DIR")"
+  quickref_count="$(_count "$QUICKREF_DIR")"
+  undo_count="$(_count "$UNDO_DIR")"
+  quiz_count="$(_count "$QUIZ_DIR")"
+
+  printf "  ${_d}── Learn  (%d cheatsheets  %d workflows  %d quizzes) ────────────────${_n}\n" \
+    "$tools_count" "$workflows_count" "$quiz_count"
+  printf "  ${_y}cheat${_n} ${_d}<tool>${_n}       ${_y}qr${_n} ${_d}<tool>${_n}        ${_y}tip${_n}            ${_y}cheat --browse${_n}\n"
+  printf "  ${_y}cheat --quiz${_n} ${_d}<topic>${_n}  ${_y}cheat --undo${_n} ${_d}<tool>${_n}  ${_y}cheat --start${_n}  ${_y}cheat --search${_n} ${_d}<term>${_n}\n\n"
+}
+
+# ── Search across all content ─────────────────────────────────────────────────
+_cmd_search() {
+  local term="${1:-}"
+  [[ -z "$term" ]] && { printf "${YELLOW}Usage: cheat --search <term>${RESET}\n"; exit 1; }
+
+  printf "\n${CYAN}  ╔══════════════════════════════════════════╗${RESET}\n"
+  printf "${CYAN}  ║   Search: %-28s ║${RESET}\n" "$term"
+  printf "${CYAN}  ╚══════════════════════════════════════════╝${RESET}\n\n"
+
+  local found=0
+  local dirs=("$TOOLS_DIR" "$WORKFLOWS_DIR" "$QUICKREF_DIR" "$UNDO_DIR" "$QUIZ_DIR")
+
+  for dir in "${dirs[@]}"; do
+    [[ -d "$dir" ]] || continue
+    for f in "$dir"/*.md; do
+      [[ -f "$f" ]] || continue
+      if grep -qi "$term" "$f" 2>/dev/null; then
+        local rel="${f#$TOOLKIT/}"
+        local match
+        match=$(grep -in "$term" "$f" | head -3 | sed 's/^/    /')
+        printf "  ${GREEN}📄 %s${RESET}\n" "$rel"
+        printf "%s\n" "$match"
+        printf "\n"
+        ((found++))
+      fi
+    done
+  done
+
+  if [[ $found -eq 0 ]]; then
+    printf "  ${DIM}No results for '${term}'.${RESET}\n\n"
+  else
+    printf "  ${DIM}Found in %d file(s).${RESET}\n\n" "$found"
+  fi
+}
+
+# ── Interactive TUI (fzf) ─────────────────────────────────────────────────────
+_interactive() {
+  if ! command -v fzf &>/dev/null; then
+    _home
+    return
+  fi
+
+  local selected
+  selected=$(
+    _list_all | fzf \
+      --prompt="  › " \
+      --header=$'  Terminal Stack Reference\n  ↑↓ navigate   Enter open   Ctrl+/ toggle preview   Esc quit\n' \
+      --preview="\"$SCRIPT_DIR/cheat\" --preview {}" \
+      --preview-window="right:60%:wrap:rounded" \
+      --border=rounded \
+      --color="bg+:#1a1b26,border:#414868,header:italic:#7dcfff,prompt:#e0af68,pointer:#7dcfff,hl:#7dcfff,hl+:#7dcfff:bold" \
+      --height=95% \
+      --bind="ctrl-/:toggle-preview" \
+      --bind="?:toggle-preview" \
+      --ansi \
+      2>/dev/null
+  ) || true
+
+  [[ -n "$selected" ]] && {
+    _navigate "$selected"
+  }
+}
+
+# ── Quick ref mode ────────────────────────────────────────────────────────────
+_cmd_quick() {
+  local name="${1:-}"
+  [[ -z "$name" ]] && { printf "${YELLOW}Usage: cheat --quick <tool>${RESET}\n"; exit 1; }
+  local qr_file="$QUICKREF_DIR/$name.md"
+  [[ -f "$qr_file" ]] && _render "$qr_file" || {
+    printf "\n${YELLOW}  No quick-ref for '${name}'.${RESET}\n\n"
+    printf "  Available: "
+    ls "$QUICKREF_DIR/" 2>/dev/null | sed 's/.md$// ' | tr '\n' ' '
+    printf "\n"
+    exit 1
+  }
+}
+
+# ── Daily tip mode ────────────────────────────────────────────────────────────
+_cmd_daily() {
+  local tips_file="$PRACTICE_DIR/daily-tips.md"
+  [[ -f "$tips_file" ]] || { printf "${YELLOW}No tips file found. Run: cheat --start${RESET}\n"; exit 1; }
+  local total num tip
+  total=$(grep -c '^[0-9]' "$tips_file")
+  [[ $total -eq 0 ]] && { printf "${YELLOW}Tips file is empty.${RESET}\n"; exit 1; }
+  num=$(( RANDOM % total + 1 ))
+  tip=$(sed -n "${num}p" "$tips_file" | sed 's/^[0-9]*\. //')
+  printf "\n${CYAN}  ╔══════════════════════════════════════════╗${RESET}\n"
+  printf "${CYAN}  ║   Tip #%-3d                              ║${RESET}\n" "$num"
+  printf "${CYAN}  ╚══════════════════════════════════════════╝${RESET}\n\n"
+  printf "  ${GREEN}%s${RESET}\n\n" "$tip"
+}
+
+# ── Quiz mode ─────────────────────────────────────────────────────────────────
+_cmd_quiz() {
+  local topic="${1:-}"
+  [[ -z "$topic" ]] && { printf "${YELLOW}Usage: cheat --quiz <topic>${RESET}\n"; exit 1; }
+  local quiz_file="$QUIZ_DIR/$topic.md"
+  [[ -f "$quiz_file" ]] || {
+    printf "\n${YELLOW}  No quiz for '${topic}'.${RESET}\n\n"
+    printf "  Available: "
+    ls "$QUIZ_DIR/" 2>/dev/null | sed 's/.md$// ' | tr '\n' ' '
+    printf "\n"
+    exit 1
+  }
+
+  local questions=() answers=() line i=0 total correct=0
+  while IFS= read -r line; do
+    if [[ "$line" =~ ^Q:\ (.+) ]]; then
+      questions+=("${BASH_REMATCH[1]}")
+    elif [[ "$line" =~ ^A:\ (.+) ]]; then
+      answers+=("${BASH_REMATCH[1]}")
+    fi
+  done < "$quiz_file"
+  total=${#questions[@]}
+
+  printf "\n${CYAN}  ╔══════════════════════════════════════════╗${RESET}\n"
+  printf "${CYAN}  ║   Quiz: %s (%d questions)                 ║${RESET}\n" "$topic" "$total"
+  printf "${CYAN}  ╚══════════════════════════════════════════╝${RESET}\n\n"
+
+  for q in "${questions[@]}"; do
+    ((i++))
+    printf "  ${BOLD}Q%d/${total}:${RESET} %s\n" "$i" "$q"
+    printf "  ${DIM}  Press Enter to reveal answer (or type your answer)${RESET}\n"
+    printf "  ${CYAN}  → ${RESET}"
+    local user_answer=""
+    if [ -t 0 ]; then
+      read -r user_answer
+    fi
+    printf "  ${GREEN}  A: %s${RESET}\n" "${answers[$((i-1))]}"
+
+    # Score if user typed something
+    if [ -n "$user_answer" ]; then
+      local correct_answer="${answers[$((i-1))]}"
+      if echo "$user_answer" | grep -qi "$correct_answer"; then
+        printf "  ${GREEN}  ✓ Correct!${RESET}\n\n"
+        ((correct++))
+      else
+        printf "  ${RED}  ✗ Not quite.${RESET}\n\n"
+      fi
+    else
+      printf "\n"
+    fi
+  done
+
+  printf "  ${CYAN}  ═══════════════════════════════════════════${RESET}\n"
+  if [ -n "$user_answer" ]; then
+    printf "  ${BOLD}Score: %d/%d (%d%%)${RESET}\n\n" "$correct" "$total" "$(( correct * 100 / total ))"
+  else
+    printf "  ${DIM}Review mode — type answers next time to track score.${RESET}\n\n"
+  fi
+}
+
+# ── Undo guide mode ───────────────────────────────────────────────────────────
+_cmd_undo() {
+  local name="${1:-}"
+  [[ -z "$name" ]] && { printf "${YELLOW}Usage: cheat --undo <tool>${RESET}\n"; exit 1; }
+  local undo_file="$UNDO_DIR/$name.md"
+  [[ -f "$undo_file" ]] && _render "$undo_file" || {
+    printf "\n${YELLOW}  No undo guide for '${name}'.${RESET}\n\n"
+    printf "  Available: "
+    ls "$UNDO_DIR/" 2>/dev/null | sed 's/.md$// ' | tr '\n' ' '
+    printf "\n"
+    exit 1
+  }
+}
+
+# ── Workflow mode ─────────────────────────────────────────────────────────────
+_cmd_workflow() {
+  local name="${1:-}"
+  [[ -z "$name" ]] && {
+    printf "${YELLOW}Usage: cheat --workflow <name>${RESET}\n\n"
+    printf "  Available: "
+    ls "$WORKFLOWS_DIR/" 2>/dev/null | sed 's/.md$// ' | tr '\n' ' '
+    printf "\n"
+    exit 1
+  }
+  local wf_file="$WORKFLOWS_DIR/$name.md"
+  [[ -f "$wf_file" ]] && _render "$wf_file" || {
+    printf "\n${YELLOW}  No workflow '${name}'.${RESET}\n\n"
+    printf "  Available: "
+    ls "$WORKFLOWS_DIR/" 2>/dev/null | sed 's/.md$// ' | tr '\n' ' '
+    printf "\n"
+    exit 1
+  }
+}
+
+# ── First-run tour ────────────────────────────────────────────────────────────
+_cmd_start() {
+  local tour_file="$PRACTICE_DIR/tour.yml"
+  [[ -f "$tour_file" ]] || { printf "${YELLOW}Tour file not found. Run setup.sh first.${RESET}\n"; exit 1; }
+
+  # Parse YAML manually
+  local title intro outro
+  title="$(grep '^title:' "$tour_file" | sed 's/^title: "//;s/"$//')"
+  intro="$(grep '^intro:' "$tour_file" | sed 's/^intro: "//;s/"$//')"
+  outro="$(grep '^outro:' "$tour_file" | sed 's/^outro: "//;s/"$//')"
+
+  # Count total steps first
+  local total_steps
+  total_steps=$(grep -c '^\s*- title:' "$tour_file")
+
+  printf "\n${CYAN}  ╔══════════════════════════════════════════╗${RESET}\n"
+  printf "${CYAN}  ║   %s${RESET}\n" "$title"
+  printf "${CYAN}  ╚══════════════════════════════════════════╝${RESET}\n\n"
+  printf "  ${DIM}%s${RESET}\n\n" "$intro"
+
+  local step_num=0
+  local in_step=false
+  local step_title="" step_command="" step_desc="" step_tip=""
+  local keys=()
+
+  _render_step() {
+    ((step_num++))
+    printf "  ${BOLD}Step %d/%d: %s${RESET}\n" "$step_num" "$total_steps" "$step_title"
+    printf "  ${DIM}  %s${RESET}\n\n" "$step_desc"
+    printf "  ${GREEN}  → %s${RESET}\n\n" "$step_command"
+    if [[ ${#keys[@]} -gt 0 ]]; then
+      printf "  ${BOLD}  Key bindings:${RESET}\n"
+      local k
+      for k in "${keys[@]}"; do
+        printf "  ${DIM}    %s${RESET}\n" "$k"
+      done
+      printf "\n"
+    fi
+    if [[ -n "$step_tip" ]]; then
+      printf "  ${YELLOW}  💡 %s${RESET}\n\n" "$step_tip"
+    fi
+    if [[ $step_num -lt $total_steps ]]; then
+      printf "  ${DIM}  Press Enter to continue...${RESET}"
+      if [ -t 0 ]; then
+        read -r
+      else
+        read -r < /dev/stdin 2>/dev/null || true
+      fi
+      printf "\n"
+    fi
+  }
+
+  while IFS= read -r line; do
+    if [[ "$line" == *"- title:"* ]]; then
+      if $in_step; then
+        _render_step
+      fi
+      in_step=true
+      step_title="${line#*- title: }"
+      step_title="${step_title#\"}"
+      step_title="${step_title%\"}"
+      step_command=""
+      step_desc=""
+      step_tip=""
+      keys=()
+      continue
+    fi
+    if $in_step; then
+      if [[ "$line" == *"command:"* ]]; then
+        step_command="${line#*command: }"
+        step_command="${step_command#\"}"
+        step_command="${step_command%\"}"
+      elif [[ "$line" == *"description:"* ]]; then
+        step_desc="${line#*description: }"
+        step_desc="${step_desc#\"}"
+        step_desc="${step_desc%\"}"
+      elif [[ "$line" == *"tip:"* ]]; then
+        step_tip="${line#*tip: }"
+        step_tip="${step_tip#\"}"
+        step_tip="${step_tip%\"}"
+      elif [[ "$line" == *"    - \""* ]]; then
+        local key="${line#*    - \"}"
+        key="${key%\"}"
+        keys+=("$key")
+      elif [[ "$line" =~ ^[a-z] ]]; then
+        _render_step
+        in_step=false
+      fi
+    fi
+  done < "$tour_file"
+  if $in_step; then
+    _render_step
+  fi
+
+  printf "\n  ${CYAN}  %s${RESET}\n\n" "$outro"
+}
+
+# ── Main dispatch ─────────────────────────────────────────────────────────────
+case "${1:-}" in
+  "")
+    _home
+    ;;
+  --browse)
+    _interactive
+    ;;
+  --preview)
+    file="$(_find_topic "${2:-}")" 2>/dev/null \
+      && _render "$file" "false" 2>/dev/null \
+      || printf "${DIM}  preview unavailable${RESET}\n"
+    ;;
+  --list)
+    _list_all
+    ;;
+  --home)
+    _home
+    ;;
+  --quick)
+    _cmd_quick "$2"
+    ;;
+  --daily)
+    _cmd_daily
+    ;;
+  --quiz)
+    _cmd_quiz "$2"
+    ;;
+  --undo)
+    _cmd_undo "$2"
+    ;;
+  --workflow)
+    _cmd_workflow "$2"
+    ;;
+  --search)
+    _cmd_search "$2"
+    ;;
+  --start)
+    _cmd_start
+    ;;
+  -*)
+    printf "${YELLOW}Unknown option: $1${RESET}\n"
+    printf "Usage: cheat [<topic>] [--browse] [--list] [--home] [--start] [--quick <tool>] [--daily] [--quiz <topic>] [--undo <tool>] [--workflow <name>] [--search <term>]\n"
+    exit 1
+    ;;
+  *)
+    file="$(_find_topic "$1")" && _navigate "$1" || {
+      printf "\n${YELLOW}  No topic found for '${1}'.${RESET}\n\n"
+      printf "  Available:\n"
+      _list_all | sed "s|.*/|    ${YELLOW}|" | sed "s|$|${RESET}|"
+      printf "\n"
+      exit 1
+    }
+    ;;
+esac

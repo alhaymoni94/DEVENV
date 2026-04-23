@@ -1,0 +1,10 @@
+2024-01-15 10:00:00 INFO Server started
+2024-01-15 10:05:00 ERROR Connection failed
+2024-01-15 10:10:00 WARNING Low memory
+2024-01-15 11:00:00 ERROR Timeout
+2024-01-15 11:05:00 ERROR Connection failed
+2024-01-15 12:00:00 INFO Request processed
+2024-01-15 12:30:00 WARNING High CPU usage
+2024-01-15 13:00:00 ERROR Database timeout
+2024-01-15 13:05:00 ERROR Connection failed
+2024-01-15 14:00:00 INFO Backup completed

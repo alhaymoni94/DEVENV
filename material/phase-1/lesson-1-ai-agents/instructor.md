@@ -6,7 +6,7 @@
 
 By the end of this lesson, students will:
 - Understand how AI agents work in the terminal
-- Use `aichat` for quick questions and code analysis
+- Use `ai` for quick questions, pipe input, and code analysis
 - Use `opencode` for full coding sessions
 - Navigate the `cheat` system for self-directed learning
 - Use AI as a learning assistant throughout the camp
@@ -14,7 +14,7 @@ By the end of this lesson, students will:
 ## Prerequisites
 
 - `setup.sh` completed with 40/40 health
-- AI API key configured (OpenAI, Anthropic, or local model)
+- AI API key configured in ~/.opencode.json (OpenAI, Anthropic, Gemini, or local)
 
 ## Lesson Flow
 
@@ -23,7 +23,7 @@ By the end of this lesson, students will:
 **Talk through:**
 - Why AI in the terminal? (Context awareness, no context switching, pipe data directly)
 - The two AI tools in our stack:
-  - `aichat` — Quick questions, one-shot answers
+  - `ai` — Quick questions, one-shot answers, pipe-friendly
   - `opencode` — Full coding agent that understands your codebase
 
 **Demo:**
@@ -35,7 +35,7 @@ ai "what is the difference between grep and ack?"
 cat ~/.zshrc | ai "explain this file section by section"
 ```
 
-### Part 2: aichat Deep Dive (25 min)
+### Part 2: AI One-Shot Mode (25 min)
 
 **Cover these use cases:**
 
@@ -46,7 +46,7 @@ cat ~/.zshrc | ai "explain this file section by section"
 | Debug errors | `cat error.log \| ai "what's wrong?"` |
 | Generate scripts | `ai "write a bash script that..."` |
 | Convert data | `cat data.json \| ai "convert to CSV"` |
-| Interactive session | `ai` (opens chat) |
+| Interactive session | `ai` (opens opencode TUI) |
 
 **Have students practice:**
 1. Ask AI to explain a concept they don't understand
@@ -57,7 +57,7 @@ cat ~/.zshrc | ai "explain this file section by section"
 ### Part 3: opencode Deep Dive (20 min)
 
 **Cover:**
-- How opencode differs from aichat (reads your codebase, suggests changes)
+- How opencode differs from `ai` (reads your codebase, suggests changes, Plan vs Build mode)
 - When to use each tool
 
 **Have students practice:**
@@ -114,7 +114,7 @@ git comit -m "test"
 
 | Issue | Solution |
 |-------|----------|
-| `ai` returns nothing | Check API key: `cat ~/.config/aichat/config.yaml` |
+| `ai` returns nothing | Check API key: `cat ~/.opencode.json` |
 | `opencode` won't start | Run `opencode --version` to diagnose |
 | AI gives wrong answers | Cross-reference with `cheat` and docs |
 | Rate limiting | Wait a moment, then retry |
@@ -122,7 +122,7 @@ git comit -m "test"
 ## Assessment
 
 - Students complete the lab exercises
-- Students run `cheat --quiz aichat` (if available)
+- Students run `cheat --quiz ai` (if available)
 - Students demonstrate asking AI a question and applying the answer
 
 ## Next Lesson

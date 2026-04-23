@@ -211,6 +211,20 @@ crontab -l
 
 ---
 
+## Deliverables
+
+Save your work in `students/YOUR_NAME/phase-3/lesson-10-shell-scripting/`:
+
+| File | Description |
+|------|-------------|
+| `hello.sh` | Argument greeting script (Exercise 1) |
+| `organize.sh` | File organizer by extension (Exercise 2) |
+| `backup.sh` | Backup script (Exercise 3) |
+| `log-analyzer.sh` | Log analysis script (Exercise 4) |
+| `crontab.txt` | Cron schedule entry (Exercise 5, copy from `crontab -l`) |
+
+---
+
 ## Self-Assessment
 
 Rate yourself (1-5):

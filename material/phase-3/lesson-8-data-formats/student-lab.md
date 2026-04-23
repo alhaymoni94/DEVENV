@@ -124,6 +124,17 @@ cat ~/data/employees.json | jq 'group_by(.department) | map({dept: .[0].departme
 
 ---
 
+## Deliverables
+
+Save your work in `students/YOUR_NAME/phase-3/lesson-8-data-formats/`:
+
+| File | Description |
+|------|-------------|
+| `employees.json` | JSON export from visidata (Exercise 1) |
+| `data-analysis.md` | Markdown report from bonus challenge (optional) |
+
+---
+
 ## Self-Assessment
 
 Rate yourself (1-5):

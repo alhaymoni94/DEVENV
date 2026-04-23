@@ -10,7 +10,7 @@ Phase 4 introduces Docker for containerization and local AI development. Student
 |---|-------|----------|-----------|
 | 11 | Docker Basics | 2 hours | docker, lazydocker |
 | 12 | Docker Compose | 2 hours | docker compose, lazydocker |
-| 13 | Local AI Development | 2 hours | ollama, opencode, aichat |
+| 13 | Local AI Development | 2 hours | ollama, opencode, ai |
 
 ## Learning Objectives
 

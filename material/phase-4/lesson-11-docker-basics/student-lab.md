@@ -149,6 +149,17 @@ docker system prune -a --volumes
 
 ---
 
+## Deliverables
+
+Save your work in `students/YOUR_NAME/phase-4/lesson-11-docker-basics/`:
+
+| File | Description |
+|------|-------------|
+| `Dockerfile` | Custom image build (Exercise 2) |
+| `app.py` | Flask app (Exercise 2) |
+
+---
+
 ## Self-Assessment
 
 Rate yourself (1-5):

@@ -284,6 +284,17 @@ dir-summary.sh ~/Documents/AUT-Linux-Camp/toolkit
 
 ---
 
+## Deliverables
+
+Save your work in `students/YOUR_NAME/phase-1/lesson-2-unix-fundamentals/`:
+
+| File | Description |
+|------|-------------|
+| `greet.sh` | Executable greeting script (Exercise 4) |
+| `dir-summary.sh` | Directory summary script (Exercise 7) |
+
+---
+
 ## Self-Assessment
 
 Rate yourself (1-5):

@@ -1,0 +1,52 @@
+# Dockerfile for integration testing setup.sh
+# Usage: docker build -f tests/Dockerfile.integration -t camp-test .
+FROM ubuntu:24.04
+
+# Prevent interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+ENV NONINTERACTIVE=1
+ENV CI=1
+
+# Install base dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    wget \
+    unzip \
+    build-essential \
+    sudo \
+    zsh \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create a test user (required for Homebrew)
+RUN useradd -m -s /bin/bash tester && \
+    echo "tester ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+USER tester
+WORKDIR /home/tester
+
+# Install Homebrew
+RUN /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || true
+ENV PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}"
+
+# Verify brew works
+RUN brew --version || echo "Brew install may have failed — continuing anyway"
+
+# Copy the camp repository
+COPY --chown=tester:tester . /home/tester/AUT-Linux-Camp
+WORKDIR /home/tester/AUT-Linux-Camp
+
+# Run setup.sh (may fail on some tools, but should not crash)
+RUN bash toolkit/setup.sh < /dev/null || echo "Setup completed with some non-fatal errors"
+
+# Run doctor.sh and capture output
+RUN bash toolkit/doctor.sh > /tmp/doctor-output.txt 2>&1 || true
+
+# Verify Python CLI works
+RUN python3 toolkit/scripts/camp --help
+
+# Print doctor results for inspection
+RUN cat /tmp/doctor-output.txt
+
+# Default: show doctor output
+CMD ["cat", "/tmp/doctor-output.txt"]

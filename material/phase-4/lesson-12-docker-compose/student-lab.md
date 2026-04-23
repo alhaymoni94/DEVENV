@@ -191,6 +191,20 @@ docker compose down
 
 ---
 
+## Deliverables
+
+Save your work in `students/YOUR_NAME/phase-4/lesson-12-docker-compose/`:
+
+| File | Description |
+|------|-------------|
+| `docker-compose.yml` | Multi-service compose file (Exercise 2) |
+| `Dockerfile` | App image build (Exercise 2) |
+| `requirements.txt` | Python dependencies (Exercise 2) |
+| `app.py` | Flask app (Exercise 2) |
+| `backup.sql` | Database backup (Exercise 3) |
+
+---
+
 ## Self-Assessment
 
 Rate yourself (1-5):

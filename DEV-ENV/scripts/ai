@@ -1,0 +1,159 @@
+#!/usr/bin/env bash
+# ai — Wrapper that makes opencode work as a drop-in replacement for aichat
+# Usage:
+#   ai "your question"           → One-shot question
+#   cat file | ai "explain"      → Pipe input with prompt
+#   ai                           → Start interactive opencode session
+#   ai --help                    → Show help
+
+set -euo pipefail
+
+# Colors
+_RED='\033[0;31m'
+_GREEN='\033[0;32m'
+_YELLOW='\033[0;33m'
+_DIM='\033[2m'
+_RESET='\033[0m'
+
+_help() {
+  cat <<'EOF'
+ai — AI assistant (powered by opencode)
+
+Usage:
+  ai "your question"              Ask a one-shot question
+  cat file | ai "explain"         Pipe input with a prompt
+  ai                              Start interactive session
+  ai --system "role" "question"   Use a system prompt
+  ai --model <name> "question"    Use a specific model
+  ai --help                       Show this help
+
+Examples:
+  ai "explain recursion in Python"
+  cat main.py | ai "explain this code"
+  ai --system "you are a shell expert" "how do I find large files?"
+
+Config: ~/.opencode.json
+EOF
+}
+
+# Check if opencode is installed
+if ! command -v opencode &>/dev/null; then
+  printf "${_RED}Error: opencode is not installed${_RESET}\n"
+  printf "${_DIM}Install: brew install anomalyco/tap/opencode${_RESET}\n"
+  exit 1
+fi
+
+# No arguments → start interactive session
+if [ $# -eq 0 ]; then
+  exec opencode
+fi
+
+# Handle --help
+if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+  _help
+  exit 0
+fi
+
+# Parse options
+_SYSTEM_PROMPT=""
+_MODEL=""
+_ARGS=()
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --system|-s)
+      if [ $# -lt 2 ]; then
+        printf "${_RED}Error: --system requires an argument${_RESET}\n"
+        exit 1
+      fi
+      _SYSTEM_PROMPT="$2"
+      shift 2
+      ;;
+    --model|-m)
+      if [ $# -lt 2 ]; then
+        printf "${_RED}Error: --model requires an argument${_RESET}\n"
+        exit 1
+      fi
+      _MODEL="$2"
+      shift 2
+      ;;
+    --quiet|-q)
+      # opencode -q hides spinner, we always use it for one-shot
+      shift
+      ;;
+    --)
+      shift
+      _ARGS+=("$@")
+      break
+      ;;
+    -*)
+      printf "${_YELLOW}Warning: unknown flag $1 (ignored)${_RESET}\n"
+      shift
+      ;;
+    *)
+      _ARGS+=("$1")
+      shift
+      ;;
+  esac
+done
+
+# Build the prompt
+if [ ${#_ARGS[@]} -eq 0 ]; then
+  # No prompt given, check for stdin
+  if [ -t 0 ]; then
+    # No stdin either → interactive mode
+    exec opencode
+  else
+    # Just stdin, no prompt
+    _STDIN_INPUT="$(cat)"
+    _FINAL_PROMPT="$_STDIN_INPUT"
+  fi
+elif [ ${#_ARGS[@]} -eq 1 ]; then
+  # Single argument — could be a prompt or stdin + prompt
+  if [ -t 0 ]; then
+    # No stdin → just use the argument as prompt
+    _FINAL_PROMPT="${_ARGS[0]}"
+  else
+    # Has stdin → combine stdin + prompt
+    _STDIN_INPUT="$(cat)"
+    _FINAL_PROMPT="${_STDIN_INPUT}
+
+${_ARGS[0]}"
+  fi
+else
+  # Multiple arguments — join them
+  _PROMPT_PARTS=()
+  for arg in "${_ARGS[@]}"; do
+    _PROMPT_PARTS+=("$arg")
+  done
+  _USER_PROMPT="$(IFS=' '; echo "${_PROMPT_PARTS[*]}")"
+
+  if [ -t 0 ]; then
+    _FINAL_PROMPT="$_USER_PROMPT"
+  else
+    _STDIN_INPUT="$(cat)"
+    _FINAL_PROMPT="${_STDIN_INPUT}
+
+${_USER_PROMPT}"
+  fi
+fi
+
+# Add system prompt if provided
+if [ -n "$_SYSTEM_PROMPT" ]; then
+  _FINAL_PROMPT="System: ${_SYSTEM_PROMPT}
+
+${_FINAL_PROMPT}"
+fi
+
+# Build opencode command
+_OPENCODE_CMD=(opencode -p "$_FINAL_PROMPT" -q)
+
+# Note: opencode doesn't support --model flag directly in CLI
+# Model selection is done via ~/.opencode.json config or /connect in TUI
+if [ -n "$_MODEL" ]; then
+  printf "${_YELLOW}Note: --model flag is not supported in one-shot mode${_RESET}\n"
+  printf "${_DIM}Configure models in ~/.opencode.json or use interactive mode${_RESET}\n"
+fi
+
+# Execute
+exec "${_OPENCODE_CMD[@]}"

@@ -6,7 +6,7 @@
 
 By the end of this lesson, students will:
 - Understand the difference between cloud AI and local AI
-- Use aichat for quick terminal questions
+- Use `ai` for quick terminal questions and pipe input
 - Use opencode for full coding sessions
 - Configure AI tools with API keys
 - Understand model selection trade-offs
@@ -23,12 +23,12 @@ By the end of this lesson, students will:
 
 **Talk through:**
 - Why terminal AI? (no context switching, pipe data directly, works over SSH)
-- aichat vs opencode:
-  - aichat: quick questions, one-shot answers, pipe-friendly
+- `ai` vs opencode:
+  - `ai`: quick questions, one-shot answers, pipe-friendly
   - opencode: full coding agent, reads your codebase, suggests changes
 - Cost considerations (API calls vs local models)
 
-### Part 2: aichat Deep Dive (25 min)
+### Part 2: AI One-Shot Mode Deep Dive (25 min)
 
 **Cover use cases:**
 
@@ -58,7 +58,7 @@ echo "def greet(name): print(f'Hello {name}')" | ai "add type hints and docstrin
 **Cover:**
 - How opencode reads your codebase
 - Multi-step development
-- When to use opencode vs aichat
+- When to use opencode vs `ai`
 
 **Demo:**
 ```bash
@@ -96,14 +96,13 @@ cat ~/bin/organize.sh | ai "review this script for:
 ### Part 5: Model Selection & Configuration (20 min)
 
 **Cover:**
-- API key configuration: `~/.config/aichat/config.yaml`
-- Model options (GPT-4, Claude, etc.)
-- Temperature, max tokens, system prompts
+- API key configuration: `~/.opencode.json`
+- Model options (GPT-4, Claude, Gemini, etc.)
 - Cost management
 
 **Demo:**
 ```bash
-e ~/.config/aichat/config.yaml
+e ~/.opencode.json
 ```
 
 **Have students practice:**
@@ -134,11 +133,11 @@ e ~/.config/aichat/config.yaml
 
 ## Assessment
 
-- Students use aichat for quick questions
+- Students use `ai` for quick questions
 - Students use opencode for a coding session
 - Students use AI for code review
 - Students configure their AI tools
 
-## Next Lesson
+## Next Step
 
-Phase 5: Advanced Topics
+Graduation Project

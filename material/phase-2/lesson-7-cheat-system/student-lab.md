@@ -196,6 +196,16 @@ cheat --daily
 
 ---
 
+## Deliverables
+
+Save your work in `students/YOUR_NAME/phase-2/lesson-7-cheat-system/`:
+
+| File | Description |
+|------|-------------|
+| `my-favorite-tool.md` | Custom cheatsheet (Exercise 6) |
+
+---
+
 ## Self-Assessment
 
 Rate yourself (1-5):
