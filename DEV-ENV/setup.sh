@@ -16,14 +16,14 @@ TOTAL_PHASES=10 CURRENT_PHASE=0 INSTALLED=0 SKIPPED=0 NOTES=0
 spinner_pid="" spinner_chars=("⠋" "⠙" "⠹" "⠸" "⠼" "⠴" "⠦" "⠧" "⠇" "⠏")
 
 start_spinner() {
-  [ -t 1 ] || return
+  [ -t 1 ] || return 0
   local i=0
   (while true; do printf "\r${DIM}  ${spinner_chars[$i]} installing...${RESET}"; i=$(( (i + 1) % ${#spinner_chars[@]} )); sleep 0.1; done) &
   spinner_pid=$!
 }
 
 stop_spinner() {
-  [ -n "$spinner_pid" ] || return
+  [ -n "$spinner_pid" ] || return 0
   kill "$spinner_pid" 2>/dev/null; wait "$spinner_pid" 2>/dev/null
   spinner_pid=""; printf "\r${DIM}                                             ${RESET}\r"
 }
