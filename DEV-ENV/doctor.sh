@@ -71,10 +71,11 @@ if command -v starship &>/dev/null; then
 else
   fail "starship" "brew install starship"
 fi
+_USER="${USER:-$(whoami)}"
 if [[ "$OS" == "Darwin" ]]; then
-  CURRENT_SHELL="$(dscl . -read /Users/"$USER" UserShell 2>/dev/null | awk '{print $2}')"
+  CURRENT_SHELL="$(dscl . -read /Users/"$_USER" UserShell 2>/dev/null | awk '{print $2}')"
 else
-  CURRENT_SHELL="$(getent passwd "$USER" 2>/dev/null | cut -d: -f7)"
+  CURRENT_SHELL="$(getent passwd "$_USER" 2>/dev/null | cut -d: -f7)"
 fi
 [[ "$CURRENT_SHELL" == *zsh* ]] && ok "default shell" "zsh" || warn "default shell" "run: chsh -s \$(which zsh)  [current: $CURRENT_SHELL]"
 

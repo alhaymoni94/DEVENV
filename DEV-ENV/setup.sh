@@ -204,7 +204,7 @@ command -v "$BREW" &>/dev/null && skip "homebrew" || die "Homebrew not found at 
 brew_install() {
   local pkg="$1" cmd="${2:-$1}"
   if command -v "$cmd" &>/dev/null || "$BREW" list "$pkg" &>/dev/null 2>&1; then skip "$pkg"
-  else start_spinner; "$BREW" install "$pkg" >/dev/null 2>&1 && done_ "$pkg" || { stop_spinner; die "Failed to install $pkg"; }; stop_spinner
+  else start_spinner; "$BREW" install "$pkg" >/dev/null 2>&1 && done_ "$pkg" || { stop_spinner; note "Failed to install $pkg — run: brew install $pkg"; }; stop_spinner
   fi
 }
 
