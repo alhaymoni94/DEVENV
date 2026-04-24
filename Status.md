@@ -1,94 +1,82 @@
-# Linux Camp Outline
+# AUT Linux Camp — Project Status
 
 ## Goal
-Create a comprehensive Linux camp focused on terminal-based workflows, development tools, and AI-assisted processes. The camp will exclude GUI-based interactions and emphasize command-line proficiency. Students will use AI agents from day one as their learning assistants.
+A hands-on terminal skills bootcamp focused on command-line workflows, development tools, and AI-assisted processes. No GUI. Students use AI agents as learning assistants from day one.
 
-## Topics to Cover
+## Current State: v1.0 — Stable & Hardened
 
-### **Phase 1: Foundations with AI Assistance**
-1. **Introduction to AI Agents**
-   - Setting up and using AI agents in the terminal
-   - Basic commands and interactions with AI agents
-   - Using AI agents for translation and learning assistance
+The installer, cheat system, camp CLI, and CI pipeline are all working and tested.
 
-2. **Unix Terminals**
-   - Basic commands (ls, cd, grep, awk, sed)
-   - File system navigation and manipulation
-   - Permissions and ownership
-   - Shell scripting (bash/zsh)
+---
 
-3. **Tmux**
-   - Sessions, windows, and panes
-   - Customization and keybindings
-   - Workflow integration
+## Stack (installed by setup.sh)
 
-4. **Git**
-   - Basic commands (clone, commit, push, pull)
-   - Branching and merging strategies
-   - Advanced topics (rebase, cherry-pick, stash)
+| Layer | Tool | Alias |
+|-------|------|-------|
+| Terminal | WezTerm / Ghostty | — |
+| Multiplexer | tmux (Ctrl+a prefix) | — |
+| Shell | zsh + zinit + Starship | — |
+| Editor | micro | `e` |
+| File manager | yazi | `y` |
+| Git TUI | lazygit | `lg` |
+| GitHub | gh + gh-dash + gh-enhance | `ghd` |
+| AI | opencode wrapper | `ai` |
+| System monitor | btop | `top` |
+| Data | visidata + euporie | `vd` |
+| Diagrams | d2 + mmdc | — |
+| Dotfiles | chezmoi | — |
+| Runtimes | uv + mise | — |
+| Help | cheat system | `cheat`, `qr`, `tip` |
 
-### **Phase 2: Development Environment**
-5. **Doom Emacs**
-   - Installation and configuration
-   - Keybindings and workflows
-   - Plugins for development (e.g., lsp-mode, magit)
+---
 
-6. **Custom Workspace Configuration**
-   - Setting up a breezy and efficient workspace
-   - Configuration files and dotfiles management
-   - Personalizing the terminal environment
+## Phases (4 active, 2 archived)
 
-7. **Cheat Sheets System**
-   - Creating and maintaining cheat sheets
-   - Quick reference guides for commands and workflows
-   - Integration with the workspace
+| Phase | Topic | Status |
+|-------|-------|--------|
+| 1 | Foundations with AI — shell, tmux, git | Active |
+| 2 | Development Environment — micro, chezmoi, dotfiles | Active |
+| 3 | Data Manipulation — visidata, euporie, datasets | Active |
+| 4 | Containers & AI — Docker, opencode, local LLMs | Active |
+| 5 | Advanced Topics | Archived (v1.1) |
+| 6 | Workspace Automation | Archived (v1.1) |
 
-### **Phase 3: Data Manipulation and AI Assistance**
-8. **Basic Data Sets**
-   - Introduction to data sets and their formats
-   - Data cleaning and preprocessing
-   - Data visualization in the terminal
+---
 
-9. **File and Data Manipulation Using AI Agents**
-   - Handling various file formats (xlsx, ppt, md, csv, svg, sql)
-   - Data extraction and transformation
-   - Automation scripts for repetitive tasks
+## Cheat System
 
-10. **Basic Scripting**
-    - Shell scripting (bash/zsh)
-    - Python scripting for automation
-    - TUI-based application development
+79 topics across 6 categories:
+- 26 cheatsheets · 8 workflows · 5 concepts · 20 quick-refs · 9 undo guides · 11 quizzes
 
-### **Phase 4: Containerization and AI**
-11. **Containerization**
-    - Docker basics (images, containers, volumes)
-    - Dockerfile creation and best practices
-    - Docker Compose for multi-container applications
+Commands: `cheat`, `qr <tool>`, `tip`, `cheat --quiz`, `cheat --start`, `cheat --search`, `cheat --browse`
 
-12. **Local AI Development**
-    - Introduction to Ollama and Hugging Face Transformers
-    - Setting up local AI models
-    - Developing and deploying AI applications locally
+---
 
-### ~~Phase 5: Advanced Topics~~ (archived for v1.1)
-### ~~Phase 6: Workspace Automation~~ (archived for v1.1)
+## Bugs Fixed (this session)
 
-## Structure
-- **Duration**: 3-4 weeks (adjustable)
-- **Format**: Hands-on labs, workshops, and projects
-- **Assessment**: Practical exercises and a final project
+- `setup.sh`: `((VAR++))` with `set -euo pipefail` crashed on zero counters
+- `setup.sh`: spinner functions returned non-zero in non-TTY, killing Docker runs
+- `setup.sh`: `absorb()` false return triggered `set -e`
+- `setup.sh`: `tmux` and `uv` never installed (doctor checked but setup skipped them)
+- `setup.sh`: student workspace `cp` used wrong path; no guard for missing template
+- `setup.sh`: `chezmoi apply --force` overwrote customizations on re-run → now status-gated
+- `setup.sh`: TOTAL_PHASES=10 but 11 phases existed → counter overflow fixed
+- `doctor.sh`: `$USER` unbound in Docker; duplicate opencode check
+- `doctor.sh`: optional tools (llmfit, euporie, mmdc…) counted as hard failures → reclassified as extended
+- `scripts/cheat`: quiz scoring only checked last answer; regex metachar bug in answer matching
+- `scripts/cheat`: `--search` missing `concepts/` directory
+- `dotfiles/dot_zshrc`: `alias cat='bat || cat'` infinite recursion → `command cat`
+- `dotfiles/dot_zshrc`: PATH discovery failed if chezmoi not initialized → fallback loop
+- `camp_cli/submit.py`: staged check ran before `git add -A` → always reported nothing to submit
+- `camp_cli/submit.py`: local-only commit; added remote push + one-time setup hint
+- `tests/Dockerfile.integration`: missing `python3` in apt-get
+- `ci.yml`: ShellCheck missed extensionless scripts; no integration test job
 
-## Graduation Project
-- **Focus**: Local AI-based project
-- **Requirements**: Utilize skills learned in the camp to build a functional AI application
-- **Deliverables**: Project code, documentation, and a demonstration
+---
 
-## Additional Notes
-- Focus on practical, real-world applications.
-- Encourage collaboration and peer learning.
-- Provide resources for further self-study.
+## Deferred (v1.1)
 
-## Next Steps
-- Finalize the detailed syllabus for each topic.
-- Identify tools and resources for hands-on exercises.
-- Plan assessment methods and project ideas.
+- Content: quick-refs for fzf, starship, chezmoi, docker, mise
+- Content: phase 5 & 6 quizzes
+- Supervisor: `camp review-all` batch review command
+- Doctor: distinguish WezTerm/font (GUI) from core terminal failures
