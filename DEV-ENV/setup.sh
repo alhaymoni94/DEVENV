@@ -253,7 +253,14 @@ absorb() {
 }
 absorb "$HOME/.tmux.conf"
 absorb "$HOME/.zshrc"
-chezmoi apply --force --no-pager 2>/dev/null && done_ "chezmoi apply" || note "chezmoi apply had issues — run: chezmoi apply --force"
+_cm_status="$(chezmoi status 2>/dev/null | wc -l | tr -d ' ')"
+if [ "${_cm_status:-0}" -gt 0 ]; then
+  chezmoi apply --no-pager 2>/dev/null && done_ "chezmoi apply" \
+    || note "chezmoi apply had conflicts — review with: chezmoi diff"
+else
+  skip "chezmoi apply (already in sync)"
+fi
+unset _cm_status
 
 step "Runtimes + Dev Tools"
 brew_install uv
@@ -303,8 +310,13 @@ command -v intelli-shell &>/dev/null && {
 CAMP_DIR="$(cd "$TOOLKIT_DIR/.." && pwd)"
 STUDENT_WORKSPACE="$CAMP_DIR/students/${STUDENT_NAME:-$(whoami)}"
 if [ ! -d "$STUDENT_WORKSPACE" ]; then
-  cp -r "$CAMP_DIR/students/template" "$STUDENT_WORKSPACE"
-  [ -t 0 ] && printf "  ${GREEN}✓${RESET} Student workspace created: ${BOLD}students/${STUDENT_NAME:-$(whoami)}${RESET}\n"
+  TEMPLATE_DIR="$CAMP_DIR/students/template"
+  if [ -d "$TEMPLATE_DIR" ]; then
+    cp -r "$TEMPLATE_DIR" "$STUDENT_WORKSPACE"
+    [ -t 0 ] && printf "  ${GREEN}✓${RESET} Student workspace created: ${BOLD}students/${STUDENT_NAME:-$(whoami)}${RESET}\n"
+  else
+    note "students/template not found — workspace not created. Run: mkdir -p \"$STUDENT_WORKSPACE\""
+  fi
 else
   [ -t 0 ] && printf "  ${BLUE}·${RESET} Student workspace already exists\n"
 fi

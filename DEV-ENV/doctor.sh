@@ -20,7 +20,15 @@ fail() { printf "${RED}✗${RESET} %-22s → %s\n" "$1" "$2";   FAIL=$((FAIL+1))
 info() { printf "${BLUE}·${RESET} %-22s %s\n" "$1" "$2"; }
 section() { echo; printf "${BOLD}${DIM}── %s${RESET}\n" "$1"; }
 
+# Core vs extended tool tracking
+ok_core()   { ok "$1" "${2:-}";  PASS_CORE=$((PASS_CORE+1)); }
+fail_core() { fail "$1" "$2";    FAIL_CORE=$((FAIL_CORE+1)); }
+ok_ext()    { ok "$1" "${2:-}";  PASS_EXT=$((PASS_EXT+1)); }
+warn_ext()  { warn "$1" "$2";    FAIL_EXT=$((FAIL_EXT+1)); }
+
 PASS=0; WARN=0; FAIL=0
+PASS_CORE=0; FAIL_CORE=0
+PASS_EXT=0;  FAIL_EXT=0
 
 # ── Resolve paths relative to this script ─────────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -51,25 +59,25 @@ printf "   OS: %s (%s)  |  %s\n" "$OS" "$ARCH" "$(date '+%Y-%m-%d %H:%M')"
 # ── 1. Prerequisites ──────────────────────────────────────────────────────────
 section "Prerequisites"
 for tool in git curl unzip; do
-  command -v "$tool" &>/dev/null && ok "$tool" || fail "$tool" "sudo apt install $tool"
+  command -v "$tool" &>/dev/null && ok_core "$tool" || fail_core "$tool" "sudo apt install $tool"
 done
-command -v "$BREW" &>/dev/null && ok "homebrew" "$($BREW --version 2>/dev/null | head -1)" \
-  || fail "homebrew" "https://brew.sh"
+command -v "$BREW" &>/dev/null && ok_core "homebrew" "$($BREW --version 2>/dev/null | head -1)" \
+  || fail_core "homebrew" "https://brew.sh"
 
 # ── 2. Shell ──────────────────────────────────────────────────────────────────
 section "Shell"
 if command -v zsh &>/dev/null; then
   ZSH_VER="$(zsh --version 2>/dev/null | awk '{print $2}')"
-  ok "zsh" "v$ZSH_VER"
+  ok_core "zsh" "v$ZSH_VER"
   ZINIT_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/zinit/zinit.git"
   [ -d "$ZINIT_DIR" ] && ok "zinit" || warn "zinit" "git clone https://github.com/zdharma-continuum/zinit $ZINIT_DIR"
 else
-  fail "zsh" "$INSTALL_ZSH"
+  fail_core "zsh" "$INSTALL_ZSH"
 fi
 if command -v starship &>/dev/null; then
-  ok "starship" "$(starship --version | head -1)"
+  ok_core "starship" "$(starship --version | head -1)"
 else
-  fail "starship" "brew install starship"
+  fail_core "starship" "brew install starship"
 fi
 _USER="${USER:-$(whoami)}"
 if [[ "$OS" == "Darwin" ]]; then
@@ -95,21 +103,21 @@ fc-list 2>/dev/null | grep -qi "JetBrainsMono Nerd\|JetBrainsMono NF" \
 # ── 4. Multiplexer ────────────────────────────────────────────────────────────
 section "Multiplexer"
 if command -v tmux &>/dev/null; then
-  ok "tmux" "$(tmux -V)"
+  ok_core "tmux" "$(tmux -V)"
   [ -f "$HOME/.tmux.conf" ] && ok "tmux config" || warn "tmux config" "chezmoi apply"
 else
-  fail "tmux" "brew install tmux"
+  fail_core "tmux" "brew install tmux"
 fi
 
 # ── 5. Editor ─────────────────────────────────────────────────────────────────
 section "Editor (micro)"
-command -v micro &>/dev/null && ok "micro" "$(micro --version 2>/dev/null | head -1)" \
-  || fail "micro" "brew install micro"
+command -v micro &>/dev/null && ok_core "micro" "$(micro --version 2>/dev/null | head -1)" \
+  || fail_core "micro" "brew install micro"
 
 # ── 6. Dotfiles ───────────────────────────────────────────────────────────────
 section "Dotfiles"
 if command -v chezmoi &>/dev/null; then
-  ok "chezmoi" "$(chezmoi --version | head -1)"
+  ok_core "chezmoi" "$(chezmoi --version | head -1)"
   SOURCE_DIR="$CAMP_DIR/toolkit/dotfiles"
   if [ -d "$SOURCE_DIR" ]; then
     ok "chezmoi source" "$SOURCE_DIR"
@@ -120,33 +128,33 @@ if command -v chezmoi &>/dev/null; then
     warn "chezmoi source" "run: chezmoi init --source $CAMP_DIR/toolkit/dotfiles"
   fi
 else
-  fail "chezmoi" "brew install chezmoi"
+  fail_core "chezmoi" "brew install chezmoi"
 fi
 
 # ── 7. Runtimes ───────────────────────────────────────────────────────────────
 section "Runtimes"
-command -v uv &>/dev/null && ok "uv" "$(uv --version 2>/dev/null)" \
-  || fail "uv" "brew install uv"
-command -v mise &>/dev/null && ok "mise" "$(mise --version 2>/dev/null)" \
-  || fail "mise" "brew install mise"
+command -v uv &>/dev/null && ok_core "uv" "$(uv --version 2>/dev/null)" \
+  || fail_core "uv" "brew install uv"
+command -v mise &>/dev/null && ok_core "mise" "$(mise --version 2>/dev/null)" \
+  || fail_core "mise" "brew install mise"
 
 # ── 8. Dev Tools ──────────────────────────────────────────────────────────────
 section "Dev Tools"
-command -v fzf        &>/dev/null && ok "fzf"        || fail "fzf"        "brew install fzf"
-command -v lazygit    &>/dev/null && ok "lazygit"    || fail "lazygit"    "brew install lazygit"
-command -v lazydocker &>/dev/null && ok "lazydocker" || fail "lazydocker" "brew install lazydocker"
-command -v btop       &>/dev/null && ok "btop"       || fail "btop"       "brew install btop"
-command -v yazi       &>/dev/null && ok "yazi"       || fail "yazi"       "brew install yazi"
-command -v glow       &>/dev/null && ok "glow"       || fail "glow"       "brew install glow"
-command -v docker     &>/dev/null && ok "docker"     || warn "docker"     "install Docker Desktop or docker-ce"
-command -v diffnav    &>/dev/null && ok "diffnav"    || fail "diffnav"    "brew install dlvhdr/formulae/diffnav"
-command -v treemd     &>/dev/null && ok "treemd"     || fail "treemd"     "brew install treemd"
-command -v d2         &>/dev/null && ok "d2"         || fail "d2"         "brew install d2"
+command -v fzf        &>/dev/null && ok_core "fzf"        || fail_core "fzf"        "brew install fzf"
+command -v lazygit    &>/dev/null && ok_core "lazygit"    || fail_core "lazygit"    "brew install lazygit"
+command -v lazydocker &>/dev/null && ok_ext  "lazydocker" || warn_ext  "lazydocker" "brew install lazydocker"
+command -v btop       &>/dev/null && ok_core "btop"       || fail_core "btop"       "brew install btop"
+command -v yazi       &>/dev/null && ok_core "yazi"       || fail_core "yazi"       "brew install yazi"
+command -v glow       &>/dev/null && ok_core "glow"       || fail_core "glow"       "brew install glow"
+command -v docker     &>/dev/null && ok "docker"          || warn "docker"          "install Docker Desktop or docker-ce"
+command -v diffnav    &>/dev/null && ok_ext  "diffnav"    || warn_ext  "diffnav"    "brew install dlvhdr/formulae/diffnav"
+command -v treemd     &>/dev/null && ok_ext  "treemd"     || warn_ext  "treemd"     "brew install treemd"
+command -v d2         &>/dev/null && ok_ext  "d2"         || warn_ext  "d2"         "brew install d2"
 
 # ── 9. GitHub ─────────────────────────────────────────────────────────────────
 section "GitHub"
 if command -v gh &>/dev/null; then
-  ok "gh" "$(gh --version | head -1)"
+  ok_core "gh" "$(gh --version | head -1)"
   if gh auth status &>/dev/null 2>&1; then
     ok "gh auth" "authenticated"
   else
@@ -163,35 +171,26 @@ if command -v gh &>/dev/null; then
     warn "gh-enhance" "run: gh extension install dlvhdr/gh-enhance"
   fi
 else
-  fail "gh" "brew install gh"
+  fail_core "gh" "brew install gh"
 fi
 
 # ── 10. Data, Notebooks & AI ────────────────────────────────────────────────
-section "Data, Notebooks & AI"
-command -v opencode &>/dev/null && ok "opencode" || warn "opencode" "brew install opencode (optional)"
-command -v euporie  &>/dev/null && ok "euporie"  || fail "euporie"  "uv tool install euporie"
-command -v visidata &>/dev/null && ok "visidata" || fail "visidata" "uv tool install visidata"
-command -v llmfit   &>/dev/null && ok "llmfit"   || fail "llmfit"   "brew install llmfit"
+section "Data, Notebooks & AI  (extended — optional)"
+command -v opencode &>/dev/null && ok_ext "opencode" || warn_ext "opencode" "brew install opencode (optional)"
+command -v euporie  &>/dev/null && ok_ext "euporie"  || warn_ext "euporie"  "uv tool install euporie"
+command -v visidata &>/dev/null && ok_ext "visidata" || warn_ext "visidata" "uv tool install visidata"
+command -v llmfit   &>/dev/null && ok_ext "llmfit"   || warn_ext "llmfit"   "brew install llmfit"
 if command -v intelli-shell &>/dev/null; then
-  ok "intelli-shell" "installed"
+  ok_ext "intelli-shell" "installed"
   if grep -q "intelli-shell init zsh" "$HOME/.zshrc" 2>/dev/null; then
     ok "intelli-shell init" "shell integration loaded"
   else
     warn "intelli-shell init" "run: echo 'eval \"\$(intelli-shell init zsh)\"' >> ~/.zshrc"
   fi
 else
-  fail "intelli-shell" "brew install intelli-shell"
+  warn_ext "intelli-shell" "brew install intelli-shell"
 fi
-# Check AI connectivity (optional)
-if command -v opencode &>/dev/null; then
-  if opencode --version >/dev/null 2>&1; then
-    ok "opencode installed" "run 'ai' to test"
-  else
-    warn "opencode connectivity" "check ~/.opencode.json or run setup.sh"
-  fi
-fi
-
-command -v mmdc     &>/dev/null && ok "mmdc"     || fail "mmdc"     "npm install -g @mermaid-js/mermaid-cli"
+command -v mmdc &>/dev/null && ok_ext "mmdc" || warn_ext "mmdc" "npm install -g @mermaid-js/mermaid-cli"
 
 # ── Keyboard note ─────────────────────────────────────────────────────────────
 section "System Note"
@@ -199,39 +198,43 @@ echo "   Caps Lock → Ctrl remapping:"
 echo "   $CAPS_NOTE"
 
 # ── Summary ───────────────────────────────────────────────────────────────────
-TOTAL=$((PASS + WARN + FAIL))
-HEALTH_PCT=$(( PASS * 100 / TOTAL ))
+TOTAL_CORE=$((PASS_CORE + FAIL_CORE))
+TOTAL_EXT=$((PASS_EXT + FAIL_EXT))
+HEALTH_CORE=$(( TOTAL_CORE > 0 ? PASS_CORE * 100 / TOTAL_CORE : 100 ))
+HEALTH_EXT=$(( TOTAL_EXT  > 0 ? PASS_EXT  * 100 / TOTAL_EXT  : 100 ))
 
-# Build health bar
-bar=""
-for i in $(seq 1 30); do
-  pct=$(( i * 100 / 30 ))
-  if [ "$pct" -le "$HEALTH_PCT" ]; then
-    bar="${bar}█"
-  else
-    bar="${bar}░"
-  fi
-done
+build_bar() {
+  local pct="$1" bar="" i pct_i
+  for i in $(seq 1 30); do
+    pct_i=$(( i * 100 / 30 ))
+    [ "$pct_i" -le "$pct" ] && bar="${bar}█" || bar="${bar}░"
+  done
+  printf "%s" "$bar"
+}
 
 echo
 printf "\033[1;36m╔══════════════════════════════════════╗\033[0m\n"
 printf "\033[1;36m║   Stack Health Report                ║\033[0m\n"
 printf "\033[1;36m╚══════════════════════════════════════╝\033[0m\n"
 echo
-printf "  Health: [%s] %d%%\n" "$bar" "$HEALTH_PCT"
+printf "  Core    : [%s] %d%%  (%d/%d)\n" "$(build_bar "$HEALTH_CORE")" "$HEALTH_CORE" "$PASS_CORE" "$TOTAL_CORE"
+printf "  Extended: [%s] %d%%  (%d/%d)\n" "$(build_bar "$HEALTH_EXT")"  "$HEALTH_EXT"  "$PASS_EXT"  "$TOTAL_EXT"
 echo
-printf "  \033[32m✓ %d passed\033[0m   \033[33m⚠ %d warnings\033[0m   \033[31m✗ %d failed\033[0m   (of %d checks)\n" \
-  "$PASS" "$WARN" "$FAIL" "$TOTAL"
+printf "  \033[32m✓ %d passed\033[0m   \033[33m⚠ %d warnings\033[0m   \033[31m✗ %d failed\033[0m\n" \
+  "$PASS" "$WARN" "$FAIL"
+printf "  \033[2m(Extended tool failures shown as warnings, not core failures)\033[0m\n"
 echo
 
-if [ "$FAIL" -eq 0 ] && [ "$WARN" -eq 0 ]; then
+if [ "$FAIL_CORE" -eq 0 ] && [ "$FAIL_EXT" -eq 0 ] && [ "$WARN" -eq 0 ]; then
   printf "\033[1;32m  ╔══════════════════════════════════════════╗\033[0m\n"
   printf "\033[1;32m  ║   ✓ Stack is fully healthy               ║\033[0m\n"
   printf "\033[1;32m  ╚══════════════════════════════════════════╝\033[0m\n"
-elif [ "$FAIL" -eq 0 ]; then
-  printf "\033[1;33m  ⚠ Minor issues (optional tools like AI may be missing)\033[0m\n"
-  printf "\033[1;33m    Run setup.sh to resolve, or continue without them\033[0m\n"
+elif [ "$FAIL_CORE" -gt 0 ]; then
+  printf "\033[1;31m  ✗ Core tool(s) missing — run setup.sh to resolve\033[0m\n"
+elif [ "$FAIL_EXT" -gt 0 ]; then
+  printf "\033[1;33m  ⚠ Core stack healthy. Some extended tools missing.\033[0m\n"
+  printf "\033[1;33m    Run setup.sh to install, or continue without them.\033[0m\n"
 else
-  printf "\033[1;31m  ✗ Issues found — run setup.sh to resolve\033[0m\n"
+  printf "\033[1;33m  ⚠ Core stack healthy. Minor config items need attention (see warnings above).\033[0m\n"
 fi
 echo

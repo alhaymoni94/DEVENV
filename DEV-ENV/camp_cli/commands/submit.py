@@ -57,7 +57,33 @@ def run(args: argparse.Namespace) -> int:
         capture_output=True,
     )
 
+    # Push to remote if configured
+    remote_result = subprocess.run(
+        ["git", "-C", str(sdir), "remote", "get-url", "origin"],
+        capture_output=True,
+    )
+    if remote_result.returncode == 0:
+        push_result = subprocess.run(
+            ["git", "-C", str(sdir), "push", "origin", "HEAD"],
+            capture_output=True,
+            text=True,
+        )
+        if push_result.returncode == 0:
+            print(f"{Colors.GREEN}✓{Colors.RESET} Pushed to remote.")
+        else:
+            print(f"{Colors.YELLOW}!{Colors.RESET} Push failed (local commit still saved).")
+            print(f"{Colors.DIM}{push_result.stderr.strip()}{Colors.RESET}")
+    else:
+        hint_file = sdir / ".git" / ".camp_remote_hint_shown"
+        if not hint_file.exists():
+            hint_file.touch()
+            print()
+            print(f"{Colors.YELLOW}!{Colors.RESET} No remote configured. Work saved locally only.")
+            print(f"{Colors.DIM}To share with your supervisor:{Colors.RESET}")
+            print(f"  git -C {sdir} remote add origin <your-repo-url>")
+            print(f"  git -C {sdir} push -u origin HEAD")
+
     print()
     print(f"{Colors.GREEN}✓{Colors.RESET} Phase {phase} submitted!")
-    print(f"{Colors.DIM}Your supervisor will review it. Run 'camp progress' to check status.{Colors.RESET}")
+    print(f"{Colors.DIM}Run 'camp progress' to check status.{Colors.RESET}")
     return 0

@@ -5,31 +5,87 @@ on:
     branches: [main, master]
   pull_request:
     branches: [main, master]
+  schedule:
+    - cron: '0 3 * * 0'   # Docker integration build weekly (Sundays 03:00 UTC)
 
 jobs:
-  shellcheck:
-    name: Shellcheck
+  # ── 1. Bash syntax check (fast, catches parse errors) ────────────────────────
+  bash-syntax:
+    name: Bash Syntax (bash -n)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Run ShellCheck
-        uses: ludeeus/action-shellcheck@master
-        with:
-          scandir: './toolkit'
-          severity: warning
+      - name: Syntax check all bash scripts
+        run: |
+          fail=0
+          # .sh files in toolkit/ and tests/
+          while IFS= read -r -d '' f; do
+            bash -n "$f" 2>/tmp/err || { echo "SYNTAX ERROR: $f"; cat /tmp/err; fail=1; }
+          done < <(find toolkit tests -name "*.sh" -print0)
+          # extensionless bash scripts in toolkit/scripts/
+          for f in toolkit/scripts/*; do
+            [ -f "$f" ] || continue
+            head -1 "$f" | grep -q "bash" || continue
+            bash -n "$f" 2>/tmp/err || { echo "SYNTAX ERROR: $f"; cat /tmp/err; fail=1; }
+          done
+          exit $fail
 
-  pytest:
-    name: Pytest
+  # ── 2. ShellCheck (static analysis) ──────────────────────────────────────────
+  shellcheck:
+    name: ShellCheck
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - run: sudo apt-get install -y shellcheck
+      - name: Run ShellCheck on all bash files
+        run: |
+          mapfile -t files < <(find toolkit tests -name "*.sh")
+          for f in toolkit/scripts/*; do
+            [ -f "$f" ] && head -1 "$f" | grep -q "bash" && files+=("$f")
+          done
+          shellcheck --severity=warning "${files[@]}"
+
+  # ── 3. Pytest (unit tests) ────────────────────────────────────────────────────
+  pytest:
+    name: Pytest (unit tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install dependencies
-        run: pip install pytest
-      - name: Run tests
-        run: pytest tests/ -v
+      - run: pip install pytest
+      - run: pytest tests/ -v
         env:
           PYTHONPATH: toolkit
+
+  # ── 4. Bash integration tests ─────────────────────────────────────────────────
+  integration:
+    name: Integration Tests (bash)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run integration tests
+        run: bash tests/integration-test.sh
+      - name: Run onboarding tests
+        run: bash tests/onboarding-test.sh
+
+  # ── 5. Docker integration build (weekly or opt-in via commit message) ─────────
+  docker-build:
+    name: Docker Integration Build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || contains(github.event.head_commit.message, '[docker-ci]')
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker integration image
+        run: |
+          docker build \
+            -f tests/Dockerfile.integration \
+            -t camp-integration-test \
+            --progress=plain \
+            .
+      - name: Run doctor inside container
+        run: docker run --rm camp-integration-test

@@ -34,12 +34,18 @@ setopt NO_BEEP
 # ── PATH ──────────────────────────────────────────────────────────────────────
 export PATH="$HOME/.local/bin:$PATH"
 
-# AUT Linux Camp scripts — auto-discovered from chezmoi source dir
-_AUT_CAMP_DIR="$(chezmoi source-path 2>/dev/null || echo "$HOME/.local/share/chezmoi")"
-if [ -d "$_AUT_CAMP_DIR/../scripts" ]; then
-  export PATH="$(dirname "$_AUT_CAMP_DIR")/scripts:$PATH"
-fi
-unset _AUT_CAMP_DIR
+# AUT Linux Camp scripts — resolved once, reused throughout this file
+_AUT_CAMP_SCRIPTS=""
+for _try in \
+  "$(chezmoi source-path 2>/dev/null)/.." \
+  "$HOME/Documents/AUT-Projects/AUT-Linux-Camp/toolkit" \
+  "$HOME/AUT-Linux-Camp/toolkit" \
+  "$HOME/.local/share/chezmoi/.."; do
+  if [ -d "$_try/scripts" ]; then
+    _AUT_CAMP_SCRIPTS="$(cd "$_try/scripts" 2>/dev/null && pwd)" && break
+  fi
+done
+[ -n "$_AUT_CAMP_SCRIPTS" ] && export PATH="$_AUT_CAMP_SCRIPTS:$PATH"
 
 # Homebrew (Linux path)
 if [[ -f "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
@@ -140,8 +146,6 @@ alias tip='cheat --daily'
 # ai command → opencode wrapper (in toolkit/scripts/)
 
 # ── Stack management ─────────────────────────────────────────────────────────
-_AUT_CAMP_DIR="$(chezmoi source-path 2>/dev/null || echo "$HOME/.local/share/chezmoi")"
-_AUT_CAMP_SCRIPTS="$(dirname "$_AUT_CAMP_DIR")/scripts"
 alias stack-update="bash '$_AUT_CAMP_SCRIPTS/update.sh'"
 alias stack-backup="bash '$_AUT_CAMP_SCRIPTS/backup.sh'"
 alias stack-restore="bash '$_AUT_CAMP_SCRIPTS/restore.sh'"
@@ -152,7 +156,6 @@ alias camp-progress="camp progress"
 alias camp-next="camp next"
 alias camp-submit="camp submit"
 alias evaluate="camp evaluate"
-unset _AUT_CAMP_DIR _AUT_CAMP_SCRIPTS
 
 # ── Daily cheat reminder (shows once per day) ─────────────────────────────────
 _stack_reminder() {
@@ -171,10 +174,9 @@ _stack_dashboard() {
   local marker="$HOME/.cache/stack-dashboard-shown"
   if [ ! -f "$marker" ]; then
     touch "$marker"
-    _AUT_CAMP_DIR="$(chezmoi source-path 2>/dev/null || echo "$HOME/.local/share/chezmoi")"
-    _AUT_CAMP_SCRIPTS="$(dirname "$_AUT_CAMP_DIR")/scripts"
     bash "$_AUT_CAMP_SCRIPTS/dashboard.sh"
-    unset _AUT_CAMP_DIR _AUT_CAMP_SCRIPTS
   fi
 }
 _stack_dashboard
+
+unset _AUT_CAMP_SCRIPTS
