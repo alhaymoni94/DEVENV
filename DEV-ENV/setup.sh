@@ -11,7 +11,7 @@ CONFIG_FILE="$TOOLKIT_DIR/.setup-config"
 
 BOLD="\033[1m" CYAN="\033[1;36m" BLUE="\033[1;34m" GREEN="\033[32m" YELLOW="\033[33m" RED="\033[31m" MAGENTA="\033[1;35m" DIM="\033[2m" RESET="\033[0m"
 
-TOTAL_PHASES=10 CURRENT_PHASE=0 INSTALLED=0 SKIPPED=0 NOTES=0
+TOTAL_PHASES=11 CURRENT_PHASE=0 INSTALLED=0 SKIPPED=0 NOTES=0
 
 spinner_pid="" spinner_chars=("⠋" "⠙" "⠹" "⠸" "⠼" "⠴" "⠦" "⠧" "⠇" "⠏")
 
@@ -232,6 +232,7 @@ command -v wezterm &>/dev/null && skip "wezterm" || {
 }
 
 (set +o pipefail; fc-list 2>/dev/null | grep -qi "jetbrainsmono nerd\|jetbrainsmono nf") && skip "JetBrainsMono Nerd Font" || { bash "$TOOLKIT_DIR/scripts/install-fonts.sh" >/dev/null 2>&1 && done_ "JetBrainsMono Nerd Font"; }
+brew_install tmux
 
 step "Editor — micro"
 brew_install micro
@@ -255,6 +256,8 @@ absorb "$HOME/.zshrc"
 chezmoi apply --force --no-pager 2>/dev/null && done_ "chezmoi apply" || note "chezmoi apply had issues — run: chezmoi apply --force"
 
 step "Runtimes + Dev Tools"
+brew_install uv
+export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$PATH"
 for pkg in mise fzf glow lazygit lazydocker btop yazi "dlvhdr/formulae/diffnav" treemd d2; do brew_install "$pkg"; done
 
 step "Data, Notebooks & AI"

@@ -86,7 +86,7 @@ alias ghd='gh dash'
 alias top='btop'
 alias e='micro'
 alias vim='micro'
-alias cat='bat 2>/dev/null || cat'
+alias cat='bat 2>/dev/null || command cat'
 
 # yazi — quit with q and your shell cds to the last directory you visited
 function y() {

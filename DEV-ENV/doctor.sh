@@ -126,7 +126,7 @@ fi
 # ── 7. Runtimes ───────────────────────────────────────────────────────────────
 section "Runtimes"
 command -v uv &>/dev/null && ok "uv" "$(uv --version 2>/dev/null)" \
-  || fail "uv" "curl -LsSf https://astral.sh/uv/install.sh | sh"
+  || fail "uv" "brew install uv"
 command -v mise &>/dev/null && ok "mise" "$(mise --version 2>/dev/null)" \
   || fail "mise" "brew install mise"
 
