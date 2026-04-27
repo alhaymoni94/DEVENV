@@ -27,7 +27,9 @@ def test_students_dir_exists():
 
 
 def test_total_phases():
-    assert common.total_phases() == 4
+    # total_phases() is now dynamic - returns count of material/phase-* dirs
+    result = common.total_phases()
+    assert result >= 4  # At minimum should find phases 1-4
 
 
 def test_header_format():
