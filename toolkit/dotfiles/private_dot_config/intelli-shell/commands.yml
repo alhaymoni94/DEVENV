@@ -113,23 +113,29 @@
 
 # ── AI Tools ──────────────────────────────────────────────────────────────────
 
-- description: "Start AI chat (llm)"
-  command: "llm chat"
+- description: "Start interactive AI chat (llm)"
+  command: "llm"
 
-- description: "Ask AI a question"
+- description: "Ask llm a question"
   command: "llm 'your question here'"
 
-- description: "Explain code with AI"
+- description: "Explain code with llm"
   command: "cat file.py | llm 'explain this code'"
 
-- description: "Generate code with AI"
+- description: "Generate code with llm"
   command: "llm 'write a python script that does X'"
+
+- description: "Use system prompt with llm"
+  command: "llm -s 'you are a shell expert' 'how do I find large files?'"
 
 - description: "Open AI agent (opencode)"
   command: "opencode"
 
-- description: "Ask AI to read file"
+- description: "Ask opencode to read file"
   command: "opencode path/to/file.py"
+
+- description: "Run opencode in current directory"
+  command: "opencode ."
 
 # ── System Monitoring ────────────────────────────────────────────────────────
 

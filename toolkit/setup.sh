@@ -272,6 +272,7 @@ for pkg in mise fzf glow lazygit lazydocker btop yazi "dlvhdr/formulae/diffnav" 
 
 step "Data, Notebooks & AI"
 brew_install opencode
+brew_install llm
 uv_tool_install visidata vd
 uv_tool_install euporie
 brew_install llmfit
