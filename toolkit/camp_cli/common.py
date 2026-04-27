@@ -55,8 +55,12 @@ def material_phase_dir(phase: int) -> Path:
 
 
 def total_phases() -> int:
-    """Return the total number of phases in the curriculum."""
-    return 4
+    """Return the total number of phases in the curriculum by scanning material/."""
+    mat = material_dir()
+    if not mat.exists():
+        return 4
+    phase_dirs = [d for d in mat.iterdir() if d.is_dir() and d.name.startswith("phase-")]
+    return max(len(phase_dirs), 4)
 
 
 def header(title: str) -> str:
