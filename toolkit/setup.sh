@@ -268,7 +268,7 @@ unset _cm_status
 step "Runtimes + Dev Tools"
 brew_install uv
 export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$PATH"
-for pkg in mise fzf glow lazygit lazydocker btop yazi "dlvhdr/formulae/diffnav" treemd d2; do brew_install "$pkg"; done
+for pkg in mise fzf glow lazygit lazydocker btop yazi "dlvhdr/formulae/diffnav" treemd d2 zoxide; do brew_install "$pkg"; done
 
 step "Data, Notebooks & AI"
 brew_install opencode
@@ -322,6 +322,11 @@ if [ ! -d "$STUDENT_WORKSPACE" ]; then
   fi
 else
   [ -t 0 ] && printf "  ${BLUE}·${RESET} Student workspace already exists\n"
+fi
+
+# Initialize git in student workspace
+if [ -d "$STUDENT_WORKSPACE" ] && [ ! -d "$STUDENT_WORKSPACE/.git" ]; then
+  cd "$STUDENT_WORKSPACE" && git init >/dev/null 2>&1 && [ -t 0 ] && printf "  ${GREEN}✓${RESET} Git repository initialized\n"
 fi
 
 printf "\n${CYAN}╔══════════════════════════════════════════════════╗${RESET}\n"
