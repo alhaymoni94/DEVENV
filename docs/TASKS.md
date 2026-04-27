@@ -2,22 +2,6 @@
 
 ## Active Tasks
 
-### Phase 5: Testing (Pending)
-
-| Task | Status | Notes |
-|------|--------|-------|
-| Fix eval pattern in setup.sh | ✅ Done | Replaced eval with declare -n |
-| Add type hints to Python commands | ✅ Done | Already present in codebase |
-| Make total_phases() dynamic | ✅ Done | Scans material/ for phase-* dirs |
-
-### Phase 5: Testing (Pending)
-
-| Task | Status | Notes |
-|------|--------|-------|
-| Add tests for evaluate scoring | ⏳ Pending | Test automated point calculation |
-| Add tests for submit git workflow | ⏳ Pending | Test commit/push logic |
-| Document test commands | ⏳ Pending | Add to docs/ |
-
 ### Phase 6: Security & Cleanup (Pending)
 
 | Task | Status | Notes |
@@ -45,10 +29,18 @@
 - [x] Create docs/STATUS.md
 - [x] Create docs/BACKLOG.md
 - [x] Create docs/TASKS.md
+- [x] Add test documentation to STATUS.md
 
 ### Code Quality ✅
 - [x] Replace eval with nameref in setup.sh
 - [x] Make total_phases() dynamic
+
+### Testing ✅ (Phase 5)
+- [x] Fix test_total_phases for dynamic behavior
+- [x] Add 13 evaluate scoring tests
+- [x] Add 8 submit git workflow tests
+- [x] Add 4 progress command tests
+- [x] Add conftest.py with shared fixtures
 
 ## How to Use
 
@@ -62,3 +54,4 @@
 - Use atomic commits
 - Update docs/ after each commit
 - Keep STATUS.md current
+- Run tests: `python3 -m pytest tests/ -v`
