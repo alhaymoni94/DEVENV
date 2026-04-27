@@ -8,6 +8,7 @@
 | [STATUS.md](STATUS.md) | Current project status, health, active students |
 | [BACKLOG.md](BACKLOG.md) | Future features, improvements, technical debt |
 | [TASKS.md](TASKS.md) | Current work items and implementation tasks |
+| [SECURITY.md](SECURITY.md) | Security best practices, API key management |
 
 ## Quick Reference
 

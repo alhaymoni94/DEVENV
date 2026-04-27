@@ -1,12 +1,33 @@
+# Chezmoi
 toolkit/dotfiles/.git/
 toolkit/dotfiles/.gitignore
+
+# Setup config (contains student info/API keys)
 toolkit/.setup-config
+
+# AI tools
 .opencode/
 claude-code-latest.txt
+
+# Personal/untracked files
 scanned_document.pdf
 appsRepo.md
+
+# Runtime managers
 mise.toml
+
+# Python
 __pycache__/
 *.pyc
 .pytest_cache/
 .coverage
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

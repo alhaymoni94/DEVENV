@@ -79,6 +79,9 @@ _(To be updated by supervisor)_
 
 ## Recent Changes
 
+- 2026-04-27: Phase 6 complete - security docs and .gitignore cleanup
+- 2026-04-27: Added SECURITY.md with API key best practices
+- 2026-04-27: Enhanced .gitignore with IDE/OS entries
 - 2026-04-27: Phase 5 complete - expanded test suite to 35 tests
 - 2026-04-27: Added evaluate scoring tests (13 cases)
 - 2026-04-27: Added submit git workflow tests (8 cases)
