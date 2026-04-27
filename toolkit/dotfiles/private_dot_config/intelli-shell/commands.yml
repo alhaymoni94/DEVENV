@@ -1,23 +1,8 @@
 # Intelli-Shell Commands — AUT Terminal Stack
 # Import: intelli-shell import commands.yml
-# ~60 commands covering every tool in the stack
+# Updated: 2026-04-27
 
-# ── Shell ──────────────────────────────────────────────────────────────────────
-
-- description: "Search command history interactively"
-  command: "history | grep keyword"
-
-- description: "Rerun last command with sudo"
-  command: "sudo !!"
-
-- description: "Delete to start of line"
-  command: "Ctrl+U"
-
-- description: "Delete to end of line"
-  command: "Ctrl+K"
-
-- description: "Clear screen"
-  command: "Ctrl+L"
+# ── Shell Essentials ───────────────────────────────────────────────────────────
 
 - description: "Go up one directory"
   command: "cd .."
@@ -25,51 +10,53 @@
 - description: "Go up two directories"
   command: "cd ../.."
 
+- description: "Go to previous directory"
+  command: "cd -"
+
 - description: "Reset broken PATH"
-  command: "export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+  command: "export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.local/bin:$HOME/.cargo/bin"
 
-- description: "Unfreeze terminal (after accidental Ctrl+S)"
-  command: "Ctrl+Q"
+- description: "List recent commands"
+  command: "history | tail -20"
 
-- description: "Suspend process and resume later"
-  command: "Ctrl+Z then fg"
+- description: "Run last command with sudo"
+  command: "sudo !!"
 
-# ── Files (yazi + micro) ─────────────────────────────────────────────────────
+# ── Navigation (yazi + zoxide) ─────────────────────────────────────────────────
 
-- description: "Open file manager in current directory"
-  command: "y"
+- description: "Open file manager (yazi)"
+  command: "yazi"
 
-- description: "Open file manager at specific path"
-  command: "y ~/path"
+- description: "Open yazi at specific path"
+  command: "yazi ~/path"
 
-- description: "Open file in micro editor"
-  command: "e file"
+- description: "Jump to recent directories (zoxide)"
+  command: "zoxide add"
+
+- description: "Open zoxide interactive selector"
+  command: "z"
+
+# ── Editor (micro) ───────────────────────────────────────────────────────────
+
+- description: "Edit file in micro"
+  command: "micro file"
 
 - description: "Open current directory in micro"
-  command: "e ."
+  command: "micro ."
 
-- description: "Create new file"
-  command: "touch filename"
+- description: "Create and edit new file"
+  command: "micro newfile.py"
 
-- description: "Create new directory"
-  command: "mkdir dirname"
-
-- description: "Find files by name"
-  command: "find . -name pattern"
-
-- description: "Bulk rename files in editor"
-  command: "ls *.old | sed 's/.old$/.new/' | xargs -I{} mv {} {}.new"
-
-# ── Git (lazygit + gh) ────────────────────────────────────────────────────────
+# ── Git (lazygit + gh) ───────────────────────────────────────────────────────
 
 - description: "Open lazygit TUI"
-  command: "lg"
+  command: "lazygit"
 
-- description: "Open GitHub PR dashboard"
-  command: "ghd"
+- description: "Open GitHub CLI dashboard"
+  command: "gh dash"
 
 - description: "Stage all and commit"
-  command: "git add -A && git commit -m message"
+  command: "git add -A && git commit -m 'commit message'"
 
 - description: "Push to remote"
   command: "git push"
@@ -77,233 +64,259 @@
 - description: "Pull from remote"
   command: "git pull"
 
-- description: "Create and checkout new branch"
+- description: "Create new branch and checkout"
   command: "git checkout -b branch-name"
 
-- description: "Amend last commit message"
-  command: "git commit --amend -m new-message"
+- description: "Amend last commit"
+  command: "git commit --amend --no-edit"
 
-- description: "Undo last commit, keep changes staged"
+- description: "Undo last commit, keep changes"
   command: "git reset --soft HEAD~1"
 
-- description: "Undo last commit, keep changes unstaged"
-  command: "git reset HEAD~1"
-
 - description: "View git log as graph"
-  command: "git log --oneline --graph --all"
+  command: "git log --oneline --graph --all -20"
 
-- description: "Stash current changes"
+- description: "Stash changes"
   command: "git stash"
 
 - description: "Apply stashed changes"
   command: "git stash pop"
 
-- description: "Create PR from current branch"
+- description: "Create PR"
   command: "gh pr create --fill"
 
 - description: "List open PRs"
   command: "gh pr list"
 
-- description: "Check PR CI status"
-  command: "gh pr checks"
+- description: "View PR status"
+  command: "gh pr status"
 
 # ── tmux ──────────────────────────────────────────────────────────────────────
 
 - description: "Create new tmux session"
   command: "tmux new -s session-name"
 
-- description: "List all tmux sessions"
+- description: "List tmux sessions"
   command: "tmux ls"
 
-- description: "Attach to last tmux session"
+- description: "Attach to last session"
   command: "tmux attach"
 
-- description: "Attach to specific tmux session"
+- description: "Attach to specific session"
   command: "tmux attach -t session-name"
 
-- description: "Kill a tmux session"
+- description: "Kill session"
   command: "tmux kill-session -t session-name"
 
 - description: "Reload tmux config"
   command: "tmux source-file ~/.tmux.conf"
 
-# ── AI (ai + opencode) ────────────────────────────────────────────────────────
+# ── AI Tools ──────────────────────────────────────────────────────────────────
 
-- description: "Start AI chat session"
-  command: "ai"
+- description: "Start AI chat (llm)"
+  command: "llm chat"
 
-- description: "Ask AI a one-shot question"
-  command: "ai your question here"
+- description: "Ask AI a question"
+  command: "llm 'your question here'"
 
-- description: "Explain a Python file with AI"
-  command: "cat file.py | ai explain this code"
+- description: "Explain code with AI"
+  command: "cat file.py | llm 'explain this code'"
 
-- description: "Ask AI to write a bash script"
-  command: "ai write a bash script that does something"
+- description: "Generate code with AI"
+  command: "llm 'write a python script that does X'"
 
-- description: "Convert JSON to CSV with AI"
-  command: "cat data.json | ai convert this to CSV"
-
-- description: "Start opencode AI agent"
+- description: "Open AI agent (opencode)"
   command: "opencode"
 
-# ── System (btop + lazydocker) ────────────────────────────────────────────────
+- description: "Ask AI to read file"
+  command: "opencode path/to/file.py"
 
-- description: "Open system monitor"
+# ── System Monitoring ────────────────────────────────────────────────────────
+
+- description: "Open system monitor (btop)"
   command: "btop"
 
-- description: "Open Docker TUI"
-  command: "lzd"
+- description: "Open Docker TUI (lazydocker)"
+  command: "lazydocker"
 
-- description: "List running Docker containers"
+- description: "List running containers"
   command: "docker ps"
 
-- description: "List all Docker containers"
+- description: "List all containers"
   command: "docker ps -a"
 
 - description: "List Docker images"
   command: "docker images"
 
-- description: "Stop all running containers"
+- description: "Stop all containers"
   command: "docker stop $(docker ps -q)"
 
-- description: "Remove all stopped containers"
+- description: "Remove stopped containers"
   command: "docker container prune -f"
 
-# ── Data (visidata + euporie + llmfit) ────────────────────────────────────────
+# ── Data Tools (visidata) ───────────────────────────────────────────────────
 
 - description: "Open CSV in visidata"
-  command: "vd file.csv"
+  command: "visidata file.csv"
 
 - description: "Open JSON in visidata"
-  command: "vd file.json"
+  command: "visidata file.json"
 
-- description: "Start Jupyter TUI"
-  command: "euporie"
+- description: "Open Excel in visidata"
+  command: "visidata file.xlsx"
 
-- description: "Run LLM evaluation"
-  command: "llmfit"
+# ── Diagrams ──────────────────────────────────────────────────────────────────
 
-# ── Diagrams (d2 + mmdc) ─────────────────────────────────────────────────────
+- description: "Render D2 diagram to SVG"
+  command: "d2 file.d2 file.svg"
 
 - description: "Render D2 diagram to PNG"
-  command: "d2 diagram.d2 diagram.png"
+  command: "d2 file.d2 file.png --dark"
 
-- description: "Render Mermaid diagram to PNG"
+- description: "Render Mermaid to PNG"
   command: "mmdc -i diagram.mmd -o diagram.png"
 
-# ── Terminal Tools (glow + diffnav + treemd) ─────────────────────────────────
+# ── Terminal Utilities ────────────────────────────────────────────────────────
 
-- description: "Render markdown file in terminal"
+- description: "Render markdown with glow"
   command: "glow file.md"
 
-- description: "Render README from git repo"
-  command: "glow repo-url"
+- description: "Render markdown from URL"
+  command: "glow https://raw.githubusercontent.com/..."
 
-- description: "Navigate git diffs interactively"
+- description: "Navigate git diffs (diffnav)"
   command: "diffnav"
 
-- description: "Show directory tree with markdown preview"
+- description: "Show directory tree"
   command: "treemd"
-
-# ── GitHub Dashboard (gh-dash) ────────────────────────────────────────────────
-
-- description: "Open GitHub PR/Issue dashboard"
-  command: "gh-dash"
-
-- description: "Filter dashboard by repository"
-  command: "gh-dash -R owner/repo"
 
 # ── Cheat System ──────────────────────────────────────────────────────────────
 
-- description: "Open interactive cheatsheet browser"
-  command: "cheat"
+- description: "Browse cheatsheets (fzf)"
+  command: "cheat --browse"
 
-- description: "Open specific cheatsheet"
+- description: "View cheatsheet for tool"
   command: "cheat tool-name"
 
-- description: "Show random pro tip"
-  command: "tip"
+- description: "Quick reference for tool"
+  command: "cheat --quick tool-name"
 
-- description: "Show quick reference for a tool"
-  command: "qr tool-name"
-
-- description: "Run quiz for a topic"
-  command: "cheat --quiz topic"
-
-- description: "List all available cheatsheets"
-  command: "cheat --list"
-
-- description: "Open undo guide for a tool"
-  command: "cheat --undo tool-name"
-
-- description: "Open workflow guide"
-  command: "cheat --workflow name"
-
-- description: "Show daily tip"
+- description: "Show random tip"
   command: "cheat --daily"
 
-- description: "Start cheatsheet browser from beginning"
+- description: "Run quiz for topic"
+  command: "cheat --quiz topic"
+
+- description: "List all cheatsheets"
+  command: "cheat --list"
+
+- description: "Undo guide for tool"
+  command: "cheat --undo tool-name"
+
+- description: "Workflow guide"
+  command: "cheat --workflow name"
+
+- description: "First-run tour"
   command: "cheat --start"
 
-# ── Workflows ─────────────────────────────────────────────────────────────────
-
-- description: "Start dev session with tmux"
-  command: "tmux new -s project && e ."
-
-- description: "Check stack health"
-  command: "bash toolkit/doctor.sh"
-
-- description: "Run full stack setup"
-  command: "bash toolkit/setup.sh"
-
-- description: "Update all dotfiles"
-  command: "chezmoi apply"
-
-- description: "Add new config to chezmoi"
-  command: "chezmoi add ~/.config/app/config"
-
-# ── Camp CLI ──────────────────────────────────────────────────────────────────
-
-- description: "Show next lesson to work on"
-  command: "camp next"
-
-- description: "View your progress through all phases"
-  command: "camp progress"
-
-- description: "Submit a completed phase for review"
-  command: "camp submit <phase-number>"
-
-- description: "Evaluate student work (supervisor)"
-  command: "camp evaluate [student] [phase]"
+- description: "Search all cheatsheets"
+  command: "cheat --search term"
 
 # ── Docker Compose ────────────────────────────────────────────────────────────
 
-- description: "Start all services with docker compose"
+- description: "Start services (detached)"
   command: "docker compose up -d"
 
-- description: "Start services and rebuild images"
+- description: "Start and rebuild"
   command: "docker compose up -d --build"
 
-- description: "Stop all compose services"
+- description: "Stop services"
   command: "docker compose down"
 
-- description: "View logs for a compose service"
-  command: "docker compose logs -f service-name"
+- description: "View logs (follow)"
+  command: "docker compose logs -f"
 
-- description: "Run command inside a compose service"
-  command: "docker compose exec service-name bash"
+- description: "Execute in container"
+  command: "docker compose exec service-name sh"
 
-# ── Intelli-Shell ─────────────────────────────────────────────────────────────
+- description: "View service status"
+  command: "docker compose ps"
 
-- description: "Search stored commands (Ctrl+Space)"
-  command: "Ctrl+Space"
+# ── Camp CLI ──────────────────────────────────────────────────────────────────
 
-- description: "Bookmark current command (Ctrl+O)"
-  command: "Ctrl+O"
+- description: "Show next lesson"
+  command: "camp next"
 
-- description: "Replace variables in command (Ctrl+L)"
-  command: "Ctrl+L"
+- description: "Show progress"
+  command: "camp progress"
 
-- description: "Fix failing command (Ctrl+X)"
-  command: "Ctrl+X"
+- description: "Submit phase for review"
+  command: "camp submit 1"
+
+- description: "Evaluate student work"
+  command: "camp evaluate student-name 1"
+
+# ── Workflows ─────────────────────────────────────────────────────────────────
+
+- description: "Start dev session (tmux + editor)"
+  command: "tmux new -s dev -n editor && micro ."
+
+- description: "Run stack health check"
+  command: "bash $TOOLKIT/doctor.sh"
+
+- description: "Run setup"
+  command: "bash $TOOLKIT/setup.sh"
+
+- description: "Apply dotfiles (chezmoi)"
+  command: "chezmoi apply"
+
+- description: "Edit chezmoi source file"
+  command: "chezmoi edit dot_zshrc"
+
+# ── Runtime Management (mise) ────────────────────────────────────────────────
+
+- description: "List installed tools"
+  command: "mise ls"
+
+- description: "Install tool version"
+  command: "mise install node@20"
+
+- description: "Run tool with mise"
+  command: "mise exec -- node --version"
+
+- description: "Show current tool versions"
+  command: "mise current"
+
+# ── File Operations ────────────────────────────────────────────────────────────
+
+- description: "Create file"
+  command: "touch filename"
+
+- description: "Create directory"
+  command: "mkdir dirname"
+
+- description: "Find files by name"
+  command: "find . -name '*.py' -type f"
+
+- description: "Find files modified today"
+  command: "find . -mtime -1"
+
+- description: "List directory by size"
+  command: "du -sh */ | sort -h"
+
+# ── Quick Aliases ────────────────────────────────────────────────────────────
+
+- description: "List files long"
+  command: "ls -la"
+
+- description: "List directories only"
+  command: "ls -d */"
+
+- description: "Show disk usage"
+  command: "df -h"
+
+- description: "Show memory usage"
+  command: "free -h"
+
+- description: "Show process tree"
+  command: "pstree"
