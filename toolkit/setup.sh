@@ -39,14 +39,16 @@ ask() {
   [ -n "$default" ] && printf "  ${CYAN}?${RESET} ${BOLD}%s${RESET} ${DIM}[%s]${RESET} " "$prompt" "$default" || printf "  ${CYAN}?${RESET} ${BOLD}%s${RESET} " "$prompt"
   [ -t 0 ] && read -r answer || answer="$default"
   [ -z "$answer" ] && [ -n "$default" ] && answer="$default"
-  eval "$var_name='$answer'"
+  declare -n ref="$var_name"
+  ref="$answer"
 }
 
 ask_secret() {
   local prompt="$1" var_name="$2" answer
   printf "  ${CYAN}?${RESET} ${BOLD}%s${RESET} " "$prompt"
   [ -t 0 ] && read -rs answer && printf "\n" || read -r answer
-  eval "$var_name='$answer'"
+  declare -n ref="$var_name"
+  ref="$answer"
 }
 
 ask_choice() {
@@ -60,7 +62,8 @@ ask_choice() {
   [ -t 0 ] && read -r answer || answer=""
   [ -z "$answer" ] && answer="$default"
   [[ "$answer" =~ ^[0-9]+$ ]] && [ "$answer" -ge 1 ] && [ "$answer" -le "${#options[@]}" ] && answer="${options[$((answer-1))]}"
-  eval "$var_name='$answer'"
+  declare -n ref="$var_name"
+  ref="$answer"
 }
 
 ask_confirm() {
