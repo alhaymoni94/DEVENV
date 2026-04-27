@@ -2,13 +2,13 @@
 
 ## Active Tasks
 
-### Phase 4: Code Quality (In Progress)
+### Phase 5: Testing (Pending)
 
 | Task | Status | Notes |
 |------|--------|-------|
-| Fix eval pattern in setup.sh | ⏳ Pending | Replace eval with nameref |
-| Add type hints to Python commands | ⏳ Pending | Focus on evaluate.py, submit.py |
-| Make total_phases() dynamic | ⏳ Pending | Scan material/ for phases |
+| Fix eval pattern in setup.sh | ✅ Done | Replaced eval with declare -n |
+| Add type hints to Python commands | ✅ Done | Already present in codebase |
+| Make total_phases() dynamic | ✅ Done | Scans material/ for phase-* dirs |
 
 ### Phase 5: Testing (Pending)
 
@@ -45,6 +45,10 @@
 - [x] Create docs/STATUS.md
 - [x] Create docs/BACKLOG.md
 - [x] Create docs/TASKS.md
+
+### Code Quality ✅
+- [x] Replace eval with nameref in setup.sh
+- [x] Make total_phases() dynamic
 
 ## How to Use
 
