@@ -111,22 +111,22 @@
 - description: "Reload tmux config"
   command: "tmux source-file ~/.tmux.conf"
 
-# ── AI Tools ──────────────────────────────────────────────────────────────────
+# ── AI Tools (ai → opencode wrapper) ──────────────────────────────────────────
 
-- description: "Start interactive AI chat (llm)"
-  command: "llm"
+- description: "Start interactive AI session"
+  command: "ai"
 
-- description: "Ask llm a question"
-  command: "llm 'your question here'"
+- description: "Ask AI a question"
+  command: "ai 'your question here'"
 
-- description: "Explain code with llm"
-  command: "cat file.py | llm 'explain this code'"
+- description: "Explain code with AI"
+  command: "cat file.py | ai 'explain this code'"
 
-- description: "Generate code with llm"
-  command: "llm 'write a python script that does X'"
+- description: "Generate code with AI"
+  command: "ai 'write a python script that does X'"
 
-- description: "Use system prompt with llm"
-  command: "llm -s 'you are a shell expert' 'how do I find large files?'"
+- description: "Use system prompt with AI"
+  command: "ai --system 'you are a shell expert' 'how do I find large files?'"
 
 - description: "Open AI agent (opencode)"
   command: "opencode"

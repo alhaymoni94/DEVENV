@@ -146,9 +146,8 @@ alias tip='cheat --daily'
 
 # ── AI commands ────────────────────────────────────────────────────────────────
 # ai → opencode wrapper (toolkit/scripts/ai)
-# llm → simple LLM CLI (brew install llm)
+# Handles: one-shot questions, pipe input, interactive mode, system prompts
 alias ai='ai'
-alias llm='llm'
 
 # ── Stack management ─────────────────────────────────────────────────────────
 alias stack-update="bash '$_AUT_CAMP_SCRIPTS/update.sh'"
