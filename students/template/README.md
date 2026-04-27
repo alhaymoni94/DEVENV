@@ -5,11 +5,23 @@
 ```
 students/
 ├── template/              ← Copy this for each student
-│   ├── phase-1/
+│   ├── phase-1/           ← Foundations (4 lessons)
 │   │   ├── lesson-1/      ← Lab solutions go here
 │   │   ├── lesson-2/
 │   │   ├── lesson-3/
 │   │   └── lesson-4/
+│   ├── phase-2/           ← Dev Environment (3 lessons)
+│   │   ├── lesson-5/
+│   │   ├── lesson-6/
+│   │   └── lesson-7/
+│   ├── phase-3/           ← Data & AI (3 lessons)
+│   │   ├── lesson-8/
+│   │   ├── lesson-9/
+│   │   └── lesson-10/
+│   ├── phase-4/           ← Containers & AI (3 lessons)
+│   │   ├── lesson-11/
+│   │   ├── lesson-12/
+│   │   └── lesson-13/
 │   └── projects/          ← Personal projects
 ├── student-name-1/
 ├── student-name-2/
